@@ -62,7 +62,7 @@ const BookedSlotsPage: React.FC = () => {
     if (!confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/cancel/${id}`, {
+      const res = await fetch(`http://localhost:5000/api/bookings/cancel/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
