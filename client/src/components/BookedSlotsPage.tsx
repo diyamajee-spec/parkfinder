@@ -39,32 +39,32 @@ const BookedSlotsPage: React.FC = () => {
   const receiptRef = useRef<HTMLDivElement>(null);
   const API = import.meta.env.VITE_API_URL;
 
-  useEffect(() => {
-    const fetchBookedSlots = async () => {
-      try {
-        const res = await fetch(
-          `${API}/api/bookings/my-bookings`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  const fetchBookedSlots = async () => {
+    try {
+      const res = await fetch(
+        `${API}/api/bookings/my-bookings`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (data.success) {
-          setBookedSlots(data.data);
-        } else {
-          setError(data.message);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
+      if (data.success) {
+        setBookedSlots(data.data);
+      } else {
+        setError(data.message);
       }
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchBookedSlots();
   }, [token]);
 
@@ -79,7 +79,7 @@ const BookedSlotsPage: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await res.json();
@@ -89,8 +89,8 @@ const BookedSlotsPage: React.FC = () => {
           prev.map((booking) =>
             booking._id === id
               ? { ...booking, bookingStatus: "cancelled" }
-              : booking
-          )
+              : booking,
+          ),
         );
         alert("Booking cancelled successfully!");
       } else {
@@ -101,7 +101,60 @@ const BookedSlotsPage: React.FC = () => {
       alert("Failed to cancel booking. Please try again.");
     }
   };
+  // vehicle handle for data analysis - Data
+  const handleVehicleEntry = async (bookingId: string) => {
+    try {
+      const res = await fetch(`${API}/api/enter/${bookingId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Vehicle entry recorded successfully!");
+        // Refresh bookings to reflect changes
+        fetchBookedSlots();
+      } else {
+        alert(data.message || "Failed to record vehicle entry");
+      }
+    } catch (err) {
+      console.error("Entry error:", err);
+      alert("Error recording vehicle entry");
+    }
+  };
+
+  const handleVehicleExit = async (bookingId: string) => {
+    if (!confirm("Are you sure you want to mark vehicle exit?")) return;
+
+    try {
+      const res = await fetch(`${API}/api/exit/${bookingId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert(
+          `Vehicle exited successfully!\nDuration: ${data.duration.toFixed(2)} minutes`,
+        );
+        // Refresh bookings to reflect changes
+        fetchBookedSlots();
+      } else {
+        alert(data.message || "Failed to record vehicle exit");
+      }
+    } catch (err) {
+      console.error("Exit error:", err);
+      alert("Error recording vehicle exit");
+    }
+  };
   const handleDownloadReceipt = (booking: Booking) => {
     setSelectedBooking(booking);
     setShowReceiptModal(true);
@@ -124,10 +177,10 @@ const BookedSlotsPage: React.FC = () => {
           <h2 style="color: #1B42CB; margin-top: 0;">Booking Details</h2>
           <p><strong>Receipt ID:</strong> ${selectedBooking._id}</p>
           <p><strong>Date:</strong> ${formatDateForReceipt(
-            selectedBooking.bookingDate
+            selectedBooking.bookingDate,
           )}</p>
           <p><strong>Status:</strong> ${getStatusText(
-            selectedBooking.bookingStatus || ""
+            selectedBooking.bookingStatus || "",
           )}</p>
         </div>
         
@@ -499,7 +552,7 @@ const BookedSlotsPage: React.FC = () => {
                             <div className="text-lg font-semibold text-[#EEECF6]">
                               {selectedBooking.bookingDate
                                 ? new Date(
-                                    selectedBooking.bookingDate
+                                    selectedBooking.bookingDate,
                                   ).toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -514,7 +567,7 @@ const BookedSlotsPage: React.FC = () => {
                             <div className="text-lg font-semibold text-[#EEECF6]">
                               {calculateEndTime(
                                 selectedBooking.bookingDate,
-                                selectedBooking.duration
+                                selectedBooking.duration,
                               )}
                             </div>
                           </div>
@@ -563,13 +616,13 @@ const BookedSlotsPage: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <div
                             className={`px-4 py-2 rounded-lg ${getStatusColor(
-                              selectedBooking.bookingStatus || ""
+                              selectedBooking.bookingStatus || "",
                             )}`}
                           >
                             <span className="font-bold">
                               Status:{" "}
                               {getStatusText(
-                                selectedBooking.bookingStatus || ""
+                                selectedBooking.bookingStatus || "",
                               )}
                             </span>
                           </div>
@@ -762,7 +815,7 @@ const BookedSlotsPage: React.FC = () => {
                 {/* Status Header */}
                 <div
                   className={`px-6 py-4 ${getStatusColor(
-                    booking.bookingStatus || ""
+                    booking.bookingStatus || "",
                   )}`}
                 >
                   <div className="flex justify-between items-center">
@@ -875,7 +928,7 @@ const BookedSlotsPage: React.FC = () => {
                           <div className="text-lg font-bold text-[#EEECF6]">
                             {calculateEndTime(
                               booking.bookingDate,
-                              booking.duration
+                              booking.duration,
                             )}
                           </div>
                         </div>
@@ -899,7 +952,7 @@ const BookedSlotsPage: React.FC = () => {
                               width: `${Math.round(
                                 ((booking.parkingId?.availableSlots || 0) /
                                   (booking.parkingId?.capacity || 1)) *
-                                  100
+                                  100,
                               )}%`,
                             }}
                           ></div>
@@ -915,7 +968,53 @@ const BookedSlotsPage: React.FC = () => {
                             Quick Actions
                           </div>
                           <div className="space-y-2">
-                            {/* यहां बदलाव किया गया है - Extend Booking की जगह Download Receipt */}
+                            {/* Entry Button - Sirf active bookings ke liye */}
+                            {booking.bookingStatus === "active" && (
+                              <button
+                                className="w-full px-4 py-2 bg-green-600/20 border border-green-500/30 text-green-300 rounded-lg hover:bg-green-600/30 transition-colors text-sm flex items-center justify-center gap-2"
+                                onClick={() => handleVehicleEntry(booking._id)}
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                Enter Vehicle
+                              </button>
+                            )}
+
+                            {/* Exit Button - Sirf active bookings ke liye */}
+                            {booking.bookingStatus === "active" && (
+                              <button
+                                className="w-full px-4 py-2 bg-orange-600/20 border border-orange-500/30 text-orange-300 rounded-lg hover:bg-orange-600/30 transition-colors text-sm flex items-center justify-center gap-2"
+                                onClick={() => handleVehicleExit(booking._id)}
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                  />
+                                </svg>
+                                Exit Vehicle
+                              </button>
+                            )}
+
+                            {/* Existing Download Receipt button */}
                             <button
                               className="w-full px-4 py-2 bg-[#191919] border border-[#1B42CB]/30 text-[#EEECF6] rounded-lg hover:bg-[#1B42CB]/10 transition-colors text-sm flex items-center justify-center gap-2"
                               onClick={() => handleDownloadReceipt(booking)}
@@ -935,6 +1034,8 @@ const BookedSlotsPage: React.FC = () => {
                               </svg>
                               Download Receipt
                             </button>
+
+                            {/* Get Directions button */}
                             <button
                               className="w-full px-4 py-2 bg-[#191919] border border-[#1B42CB]/30 text-[#EEECF6] rounded-lg hover:bg-[#1B42CB]/10 transition-colors text-sm"
                               onClick={() =>
@@ -1038,7 +1139,7 @@ const BookedSlotsPage: React.FC = () => {
                     .reduce(
                       (sum, b) =>
                         sum + (b.totalPrice || b.parkingId?.pricePerHour || 0),
-                      0
+                      0,
                     )}
                 </div>
                 <div className="text-[#EEECF6]/60">Active Total</div>

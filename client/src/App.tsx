@@ -7,6 +7,7 @@ import HomePage from "./components/HomePage";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import AdminPanel from "./components/AdminPanel";
+import DashboardPage from "./components/Dashboard";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/parkingslots" element={<ParkingSlotPage />} />
         <Route path="/bookings" element={<BookedSlotsPage />} />
         <Route path="/signup" element={<SignupPage />} />
