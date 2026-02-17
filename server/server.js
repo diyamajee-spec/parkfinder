@@ -6,6 +6,8 @@ import getbookingdata from "./getData/booking.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminSlotsRouter from "./routes/slotManage.js";
 import userManage from "./routes/userManage.js";
+import parkingLogRoute from "./routes/parkingLogRoute.js";
+import dashboardRoute from "./routes/dashboardRoute.js";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -20,7 +22,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     exposedHeaders: ["Authorization"],
-  })
+  }),
 );
 // Middleware to parse JSON body (if needed later)
 app.use(express.json());
@@ -40,6 +42,11 @@ app.use("/api/bookings", bookingRouter);
 app.use("/api/admin/slots", adminSlotsRouter);
 // use user management route.
 app.use("/api/admin/users", userManage);
+// use parkingLog --- entry exit of vehicle
+app.use("/api", parkingLogRoute);
+
+// use dashboard.js
+app.use("/api/dashboard", dashboardRoute);
 
 // Root Route
 app.get("/", (req, res) => {
