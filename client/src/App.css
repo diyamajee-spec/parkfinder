@@ -1,4 +1,7 @@
 @import "tailwindcss";
+*{
+  font-family: 'Kanit';
+}
 
 .gradient-bg {
   background: linear-gradient(to bottom right, #1b42cb, #ff2f6c);
