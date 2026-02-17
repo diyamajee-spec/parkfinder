@@ -105,8 +105,8 @@ const Navbar: React.FC = () => {
             : 'from-[#191919] via-[#0f0f0f] to-[#191919]'
         } ${themeClasses.navBg}`}
       >
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-7">
-          <div className="flex items-center justify-between h-16 md:h-18">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center group relative">
               <img
