@@ -12,6 +12,15 @@ import {
   Check,
   AlertCircle,
   Calendar,
+  Settings,
+  MapPin,
+  Clock,
+  Star,
+  Building2,
+  Car,
+  Shield,
+  Zap,
+  RefreshCw,
 } from "lucide-react";
 
 interface ParkingSlot {
@@ -166,7 +175,7 @@ export default function AdminPanel() {
       setLoading((prev) => ({ ...prev, bookings: true }));
       console.log(
         "📌 Fetching bookings with token:",
-        token?.substring(0, 20) + "..."
+        token?.substring(0, 20) + "...",
       );
 
       const res = await fetch(`${API}/api/bookings/all`, {
@@ -200,6 +209,7 @@ export default function AdminPanel() {
       setLoading((prev) => ({ ...prev, bookings: false }));
     }
   };
+
   // Handle Slot Operations
   const handleDeleteSlot = async (id: string) => {
     try {
@@ -390,7 +400,7 @@ export default function AdminPanel() {
   const filteredSlots = parkingSlots.filter(
     (slot) =>
       slot.name.toLowerCase().includes(searchTerm.parking.toLowerCase()) ||
-      slot.location.toLowerCase().includes(searchTerm.parking.toLowerCase())
+      slot.location.toLowerCase().includes(searchTerm.parking.toLowerCase()),
   );
 
   const filteredUsers = (users || []).filter((user) => {
@@ -424,26 +434,26 @@ export default function AdminPanel() {
   const getStatusColor = (status?: string): string => {
     switch ((status || "").toLowerCase()) {
       case "available":
-        return "bg-green-500 text-white";
+        return "bg-linear-to-r from-green-500 to-green-600 text-white";
       case "occupied":
-        return "bg-red-500 text-white";
+        return "bg-linear-to-r from-red-500 to-red-600 text-white";
       case "maintenance":
-        return "bg-yellow-500 text-black";
+        return "bg-linear-to-r from-yellow-500 to-yellow-600 text-black";
       default:
-        return "bg-gray-500 text-white";
+        return "bg-linear-to-r from-gray-500 to-gray-600 text-white";
     }
   };
 
   const getBookingStatusColor = (status?: string): string => {
     switch ((status || "").toLowerCase()) {
       case "active":
-        return "bg-green-500/20 text-green-300";
+        return "bg-green-500/20 text-green-300 border border-green-500/30";
       case "cancelled":
-        return "bg-red-500/20 text-red-300";
+        return "bg-red-500/20 text-red-300 border border-red-500/30";
       case "completed":
-        return "bg-blue-500/20 text-blue-300";
+        return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
       default:
-        return "bg-gray-500/20 text-gray-300";
+        return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
     }
   };
 
@@ -451,146 +461,147 @@ export default function AdminPanel() {
     const roleLower = (role || "user").toLowerCase();
     switch (roleLower) {
       case "admin":
-        return "bg-purple-500/20 text-purple-300";
+        return "bg-purple-500/20 text-purple-300 border border-purple-500/30";
       case "user":
-        return "bg-blue-500/20 text-blue-300";
+        return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
       default:
-        return "bg-gray-500/20 text-gray-300";
+        return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
     }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-[#191919] via-[#0f0f0f] to-[#191919] p-4 md:p-6">
-      {/* Animated Background */}
+      {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#1B42CB]/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#FF2F6C]/10 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#1B42CB]/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#FF2F6C]/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-linear-to-r from-[#1B42CB]/5 to-[#FF2F6C]/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header with Premium Styling */}
         <header className="mb-8">
-          <div className="backdrop-blur-xl bg-[#1B42CB]/10 border border-[#1B42CB]/20 rounded-2xl p-6 md:p-8 shadow-2xl shadow-[#1B42CB]/10">
+          <div className="backdrop-blur-xl bg-[#191919]/40 border border-[#1B42CB]/20 rounded-2xl p-6 md:p-8 shadow-2xl shadow-[#1B42CB]/10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
+                  <div className="w-14 h-14 rounded-xl bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center shadow-lg shadow-[#FF2F6C]/20">
+                    <Settings className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-[#EEECF6] to-[#1B42CB] bg-clip-text text-transparent">
-                      Admin Panel
+                    <h1 className="text-3xl md:text-4xl font-bold">
+                      <span className="bg-linear-to-r from-[#EEECF6] via-[#1B42CB] to-[#FF2F6C] bg-clip-text text-transparent">
+                        Admin Panel
+                      </span>
                     </h1>
-                    <p className="text-[#EEECF6]/60">
+                    <p className="text-[#EEECF6]/60 flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
                       Manage parking slots, users, and bookings
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="backdrop-blur-xl bg-[#191919]/80 border border-[#EEECF6]/10 rounded-xl p-4">
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white mb-1">
-                      {parkingSlots.length}
-                    </div>
-                    <div className="text-sm text-[#EEECF6]/60">
-                      Parking Slots
-                    </div>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="backdrop-blur-xl bg-[#191919]/80 border border-[#1B42CB]/30 rounded-xl p-4 text-center group hover:border-[#FF2F6C]/30 transition-all duration-300">
+                  <ParkingSquare className="w-5 h-5 text-[#1B42CB] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {parkingSlots.length}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white mb-1">
-                      {users.length}
-                    </div>
-                    <div className="text-sm text-[#EEECF6]/60">Users</div>
+                  <div className="text-xs text-[#EEECF6]/60">Parking Slots</div>
+                </div>
+                <div className="backdrop-blur-xl bg-[#191919]/80 border border-[#1B42CB]/30 rounded-xl p-4 text-center group hover:border-[#FF2F6C]/30 transition-all duration-300">
+                  <Users className="w-5 h-5 text-[#FF2F6C] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {users.length}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white mb-1">
-                      {bookings.length}
-                    </div>
-                    <div className="text-sm text-[#EEECF6]/60">Bookings</div>
+                  <div className="text-xs text-[#EEECF6]/60">Users</div>
+                </div>
+                <div className="backdrop-blur-xl bg-[#191919]/80 border border-[#1B42CB]/30 rounded-xl p-4 text-center group hover:border-[#FF2F6C]/30 transition-all duration-300">
+                  <Calendar className="w-5 h-5 text-green-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {bookings.length}
                   </div>
+                  <div className="text-xs text-[#EEECF6]/60">Bookings</div>
                 </div>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Tabs */}
+        {/* Premium Tabs */}
         <div className="mb-8 backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-2 shadow-xl">
           <div className="flex space-x-2">
             <button
               onClick={() => setActiveTab("parking")}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group ${
                 activeTab === "parking"
-                  ? "bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white"
-                  : "text-[#EEECF6]/70 hover:text-[#EEECF6] hover:bg-[#1B42CB]/10"
+                  ? "text-white"
+                  : "text-[#EEECF6]/70 hover:text-[#EEECF6]"
               }`}
             >
-              <ParkingSquare className="w-5 h-5" />
-              Parking Slots
+              {activeTab === "parking" && (
+                <div className="absolute inset-0 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] animate-gradient"></div>
+              )}
+              <ParkingSquare
+                className={`w-5 h-5 relative z-10 ${activeTab === "parking" ? "animate-pulse" : ""}`}
+              />
+              <span className="relative z-10">Parking Slots</span>
               {loading.parking && (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <RefreshCw className="w-4 h-4 relative z-10 animate-spin" />
               )}
             </button>
             <button
               onClick={() => setActiveTab("users")}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group ${
                 activeTab === "users"
-                  ? "bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white"
-                  : "text-[#EEECF6]/70 hover:text-[#EEECF6] hover:bg-[#1B42CB]/10"
+                  ? "text-white"
+                  : "text-[#EEECF6]/70 hover:text-[#EEECF6]"
               }`}
             >
-              <Users className="w-5 h-5" />
-              Users
+              {activeTab === "users" && (
+                <div className="absolute inset-0 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] animate-gradient"></div>
+              )}
+              <Users
+                className={`w-5 h-5 relative z-10 ${activeTab === "users" ? "animate-pulse" : ""}`}
+              />
+              <span className="relative z-10">Users</span>
               {loading.users && (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <RefreshCw className="w-4 h-4 relative z-10 animate-spin" />
               )}
             </button>
             <button
               onClick={() => setActiveTab("bookings")}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group ${
                 activeTab === "bookings"
-                  ? "bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white"
-                  : "text-[#EEECF6]/70 hover:text-[#EEECF6] hover:bg-[#1B42CB]/10"
+                  ? "text-white"
+                  : "text-[#EEECF6]/70 hover:text-[#EEECF6]"
               }`}
             >
-              <Calendar className="w-5 h-5" />
-              Bookings
+              {activeTab === "bookings" && (
+                <div className="absolute inset-0 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] animate-gradient"></div>
+              )}
+              <Calendar
+                className={`w-5 h-5 relative z-10 ${activeTab === "bookings" ? "animate-pulse" : ""}`}
+              />
+              <span className="relative z-10">Bookings</span>
               {loading.bookings && (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <RefreshCw className="w-4 h-4 relative z-10 animate-spin" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* Premium Error Message */}
         {error && (
-          <div className="mb-6 backdrop-blur-xl bg-red-500/10 border border-red-500/30 rounded-2xl p-4">
+          <div className="mb-6 backdrop-blur-xl bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-shake">
             <div className="flex items-center gap-3 text-red-400">
               <AlertCircle className="w-5 h-5" />
               <span className="font-medium">{error}</span>
               <button
                 onClick={() => setError(null)}
-                className="ml-auto text-red-400 hover:text-red-300"
+                className="ml-auto p-2 hover:bg-red-500/10 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -603,9 +614,9 @@ export default function AdminPanel() {
           <div className="space-y-6">
             {/* Search and Add Button */}
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
+              <div className="flex-1 relative group">
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                  <Search className="w-5 h-5 text-[#1B42CB]" />
+                  <Search className="w-5 h-5 text-[#1B42CB] group-focus-within:text-[#FF2F6C] transition-colors" />
                 </div>
                 <input
                   type="text"
@@ -617,7 +628,7 @@ export default function AdminPanel() {
                       parking: e.target.value,
                     }))
                   }
-                  className="w-full pl-12 pr-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] placeholder-[#EEECF6]/40 focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] placeholder-[#EEECF6]/40 focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                 />
               </div>
               <button
@@ -626,9 +637,9 @@ export default function AdminPanel() {
                   setEditingSlotId(null);
                   setShowSlotForm(true);
                 }}
-                className="px-6 py-3 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#FF2F6C]/20 transition-all duration-300 flex items-center justify-center gap-2"
+                className="px-6 py-3 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#FF2F6C]/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                 Add New Slot
               </button>
             </div>
@@ -636,13 +647,21 @@ export default function AdminPanel() {
             {/* Parking Slots Grid */}
             {loading.parking ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 border-4 border-[#1B42CB] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="relative">
+                  <div className="w-20 h-20 border-4 border-[#1B42CB]/20 border-t-[#FF2F6C] rounded-full animate-spin mx-auto mb-4"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Car className="w-8 h-8 text-[#FF2F6C] animate-pulse" />
+                  </div>
+                </div>
                 <p className="text-[#EEECF6]/60">Loading parking slots...</p>
               </div>
             ) : filteredSlots.length === 0 ? (
-              <div className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-12 text-center">
-                <ParkingSquare className="w-16 h-16 text-[#1B42CB]/50 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-[#EEECF6] mb-2">
+              <div className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-12 text-center group">
+                <div className="relative inline-block">
+                  <ParkingSquare className="w-20 h-20 text-[#1B42CB]/30 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                  <Zap className="w-6 h-6 text-[#FF2F6C] absolute -top-2 -right-2 animate-pulse" />
+                </div>
+                <h3 className="text-2xl font-bold text-[#EEECF6] mb-2">
                   No Parking Slots Found
                 </h3>
                 <p className="text-[#EEECF6]/60 mb-6">
@@ -655,7 +674,7 @@ export default function AdminPanel() {
                     setSlotForm({});
                     setShowSlotForm(true);
                   }}
-                  className="px-6 py-3 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#FF2F6C]/20 transition-all duration-300"
+                  className="px-6 py-3 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#FF2F6C]/20 transition-all duration-300 transform hover:-translate-y-0.5"
                 >
                   Add First Slot
                 </button>
@@ -665,16 +684,23 @@ export default function AdminPanel() {
                 {filteredSlots.map((slot) => (
                   <div
                     key={slot._id}
-                    className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300"
+                    className="group backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/20 transition-all duration-500 transform hover:-translate-y-2"
                   >
                     {/* Status Badge */}
                     <div
-                      className={`px-4 py-2 ${getStatusColor(
-                        slot.status
-                      )} flex justify-between items-center`}
+                      className={`px-4 py-3 ${getStatusColor(slot.status)} flex justify-between items-center`}
                     >
-                      <div className="text-sm font-medium">
-                        {slot.availableSlots}/{slot.capacity} slots
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        <span className="text-sm font-medium uppercase">
+                          {slot.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-black/20 px-2 py-1 rounded-lg">
+                        <Car className="w-3 h-3" />
+                        <span className="text-sm font-medium">
+                          {slot.availableSlots}/{slot.capacity}
+                        </span>
                       </div>
                     </div>
 
@@ -682,55 +708,66 @@ export default function AdminPanel() {
                     <div className="p-5">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-xl font-bold text-[#EEECF6] mb-1">
+                          <h3 className="text-xl font-bold text-[#EEECF6] mb-1 flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-[#1B42CB]" />
                             {slot.name}
                           </h3>
-                          <p className="text-[#EEECF6]/60 text-sm">
+                          <p className="text-[#EEECF6]/60 text-sm flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
                             {slot.location}
                           </p>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-[#EEECF6]">
+                          <div className="text-2xl font-bold text-[#EEECF6] flex items-start">
                             ₹{slot.pricePerHour}
-                          </div>
-                          <div className="text-sm text-[#EEECF6]/60">
-                            per hour
+                            <span className="text-sm text-[#EEECF6]/60 ml-1">
+                              /hr
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Progress Bar */}
                       <div className="mb-6">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-[#EEECF6]/60">
-                            Capacity Usage
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-[#EEECF6]/60 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Availability
                           </span>
-                          <span className="text-[#EEECF6]">
+                          <span className="text-[#EEECF6] font-medium">
                             {Math.round(
-                              (slot.availableSlots / slot.capacity) * 100
+                              (slot.availableSlots / slot.capacity) * 100,
                             )}
-                            % available
+                            %
                           </span>
                         </div>
                         <div className="h-2 bg-[#191919] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-linear-to-r from-[#1B42CB] to-[#FF2F6C]"
+                            className="h-full bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] rounded-full transition-all duration-500 group-hover:from-[#FF2F6C] group-hover:to-[#1B42CB]"
                             style={{
-                              width: `${
-                                (slot.availableSlots / slot.capacity) * 100
-                              }%`,
+                              width: `${(slot.availableSlots / slot.capacity) * 100}%`,
                             }}
                           ></div>
                         </div>
                       </div>
 
+                      {/* Rating (if available) */}
+                      {slot.rating && (
+                        <div className="flex items-center gap-1 mb-4">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-[#EEECF6]">
+                            {slot.rating}
+                          </span>
+                        </div>
+                      )}
+
                       {/* Action Buttons */}
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEditSlot(slot)}
-                          className="flex-1 py-2 bg-[#191919] border border-[#1B42CB]/30 text-[#EEECF6] rounded-lg hover:bg-[#1B42CB]/10 transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 py-2.5 bg-[#191919] border border-[#1B42CB]/30 text-[#EEECF6] rounded-xl hover:bg-linear-to-r hover:from-[#1B42CB] hover:to-[#FF2F6C] hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
                           Edit
                         </button>
                         <button
@@ -741,9 +778,9 @@ export default function AdminPanel() {
                               name: slot.name,
                             })
                           }
-                          className="flex-1 py-2 bg-[#191919] border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 py-2.5 bg-[#191919] border border-red-500/30 text-red-400 rounded-xl hover:bg-linear-to-r hover:from-red-500 hover:to-red-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                           Delete
                         </button>
                       </div>
@@ -759,9 +796,9 @@ export default function AdminPanel() {
         {activeTab === "users" && (
           <div className="space-y-6">
             {/* Search */}
-            <div className="relative">
+            <div className="relative group">
               <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                <Search className="w-5 h-5 text-[#1B42CB]" />
+                <Search className="w-5 h-5 text-[#1B42CB] group-focus-within:text-[#FF2F6C] transition-colors" />
               </div>
               <input
                 type="text"
@@ -770,20 +807,28 @@ export default function AdminPanel() {
                 onChange={(e) =>
                   setSearchTerm((prev) => ({ ...prev, users: e.target.value }))
                 }
-                className="w-full pl-12 pr-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] placeholder-[#EEECF6]/40 focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                className="w-full pl-12 pr-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] placeholder-[#EEECF6]/40 focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
               />
             </div>
 
             {/* Users Table */}
             {loading.users ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 border-4 border-[#1B42CB] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="relative">
+                  <div className="w-20 h-20 border-4 border-[#1B42CB]/20 border-t-[#FF2F6C] rounded-full animate-spin mx-auto mb-4"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-[#FF2F6C] animate-pulse" />
+                  </div>
+                </div>
                 <p className="text-[#EEECF6]/60">Loading users...</p>
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-12 text-center">
-                <Users className="w-16 h-16 text-[#1B42CB]/50 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-[#EEECF6] mb-2">
+              <div className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-12 text-center group">
+                <div className="relative inline-block">
+                  <Users className="w-20 h-20 text-[#1B42CB]/30 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                  <Zap className="w-6 h-6 text-[#FF2F6C] absolute -top-2 -right-2 animate-pulse" />
+                </div>
+                <h3 className="text-2xl font-bold text-[#EEECF6] mb-2">
                   No Users Found
                 </h3>
                 <p className="text-[#EEECF6]/60">
@@ -797,7 +842,7 @@ export default function AdminPanel() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-[#1B42CB]/20">
+                      <tr className="border-b border-[#1B42CB]/20 bg-[#191919]/80">
                         <th className="text-left py-4 px-6 text-[#EEECF6] font-semibold">
                           User
                         </th>
@@ -828,24 +873,24 @@ export default function AdminPanel() {
                         return (
                           <tr
                             key={_id}
-                            className="border-b border-[#1B42CB]/10 hover:bg-[#1B42CB]/5 transition-colors"
+                            className="border-b border-[#1B42CB]/10 hover:bg-linear-to-r hover:from-[#1B42CB]/5 hover:to-[#FF2F6C]/5 transition-all duration-300"
                           >
                             <td className="py-4 px-6">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center shadow-lg shadow-[#FF2F6C]/20">
                                   <User className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
                                   <div className="font-medium text-[#EEECF6]">
                                     {name}
                                   </div>
-                                  <div className="text-sm text-[#EEECF6]/60">
+                                  <div className="text-xs text-[#EEECF6]/40">
                                     ID: {_id.substring(0, 8)}...
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="py-4 px-6 text-[#EEECF6]">
+                            <td className="py-4 px-6 text-[#EEECF6]/80">
                               {email}
                             </td>
                             <td className="py-4 px-6">
@@ -854,9 +899,9 @@ export default function AdminPanel() {
                                 onChange={(e) =>
                                   handleRoleChange(_id, e.target.value)
                                 }
-                                className={`px-3 py-1 rounded-lg text-sm font-medium ${getRoleColor(
-                                  role
-                                )} border-0 focus:ring-2 focus:ring-[#1B42CB]/20 focus:outline-none`}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${getRoleColor(
+                                  role,
+                                )} bg-[#191919]/50 focus:ring-2 focus:ring-[#FF2F6C]/20 focus:outline-none cursor-pointer transition-all duration-300`}
                               >
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
@@ -874,9 +919,9 @@ export default function AdminPanel() {
                                     name: name,
                                   })
                                 }
-                                className="px-4 py-2 bg-[#191919] border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-[#191919] border border-red-500/30 text-red-400 rounded-xl hover:bg-linear-to-r hover:from-red-500 hover:to-red-600 hover:text-white transition-all duration-300 flex items-center gap-2 group"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 Delete
                               </button>
                             </td>
@@ -895,9 +940,9 @@ export default function AdminPanel() {
         {activeTab === "bookings" && (
           <div className="space-y-6">
             {/* Search */}
-            <div className="relative">
+            <div className="relative group">
               <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                <Search className="w-5 h-5 text-[#1B42CB]" />
+                <Search className="w-5 h-5 text-[#1B42CB] group-focus-within:text-[#FF2F6C] transition-colors" />
               </div>
               <input
                 type="text"
@@ -909,20 +954,28 @@ export default function AdminPanel() {
                     bookings: e.target.value,
                   }))
                 }
-                className="w-full pl-12 pr-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] placeholder-[#EEECF6]/40 focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                className="w-full pl-12 pr-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] placeholder-[#EEECF6]/40 focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
               />
             </div>
 
             {/* Bookings Table */}
             {loading.bookings ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 border-4 border-[#1B42CB] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="relative">
+                  <div className="w-20 h-20 border-4 border-[#1B42CB]/20 border-t-[#FF2F6C] rounded-full animate-spin mx-auto mb-4"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Calendar className="w-8 h-8 text-[#FF2F6C] animate-pulse" />
+                  </div>
+                </div>
                 <p className="text-[#EEECF6]/60">Loading bookings...</p>
               </div>
             ) : filteredBookings.length === 0 ? (
-              <div className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-12 text-center">
-                <Calendar className="w-16 h-16 text-[#1B42CB]/50 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-[#EEECF6] mb-2">
+              <div className="backdrop-blur-xl bg-[#191919]/60 border border-[#1B42CB]/20 rounded-2xl p-12 text-center group">
+                <div className="relative inline-block">
+                  <Calendar className="w-20 h-20 text-[#1B42CB]/30 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                  <Zap className="w-6 h-6 text-[#FF2F6C] absolute -top-2 -right-2 animate-pulse" />
+                </div>
+                <h3 className="text-2xl font-bold text-[#EEECF6] mb-2">
                   No Bookings Found
                 </h3>
                 <p className="text-[#EEECF6]/60">
@@ -936,7 +989,7 @@ export default function AdminPanel() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-[#1B42CB]/20">
+                      <tr className="border-b border-[#1B42CB]/20 bg-[#191919]/80">
                         <th className="text-left py-4 px-6 text-[#EEECF6] font-semibold">
                           User
                         </th>
@@ -964,18 +1017,18 @@ export default function AdminPanel() {
                       {filteredBookings.map((booking) => (
                         <tr
                           key={booking._id}
-                          className="border-b border-[#1B42CB]/10 hover:bg-[#1B42CB]/5 transition-colors"
+                          className="border-b border-[#1B42CB]/10 hover:bg-linear-to-r hover:from-[#1B42CB]/5 hover:to-[#FF2F6C]/5 transition-all duration-300"
                         >
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center shadow-lg shadow-[#FF2F6C]/20">
                                 <User className="w-5 h-5 text-white" />
                               </div>
                               <div>
                                 <div className="font-medium text-[#EEECF6]">
                                   {booking.userId?.name || "Unknown"}
                                 </div>
-                                <div className="text-sm text-[#EEECF6]/60">
+                                <div className="text-xs text-[#EEECF6]/40">
                                   {booking.userId?.email || "No email"}
                                 </div>
                               </div>
@@ -983,10 +1036,12 @@ export default function AdminPanel() {
                           </td>
                           <td className="py-4 px-6">
                             <div>
-                              <div className="font-medium text-[#EEECF6]">
+                              <div className="font-medium text-[#EEECF6] flex items-center gap-1">
+                                <Building2 className="w-3 h-3 text-[#1B42CB]" />
                                 {booking.parkingId?.name || "Unknown"}
                               </div>
-                              <div className="text-sm text-[#EEECF6]/60">
+                              <div className="text-xs text-[#EEECF6]/40 flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
                                 {booking.parkingId?.location || "N/A"}
                               </div>
                             </div>
@@ -994,12 +1049,16 @@ export default function AdminPanel() {
                           <td className="py-4 px-6 text-[#EEECF6]/60">
                             {formatDate(booking.bookingDate)}
                           </td>
-                          <td className="py-4 px-6 text-[#EEECF6]">
-                            {booking.duration} hour
-                            {booking.duration !== 1 ? "s" : ""}
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-1 text-[#EEECF6]">
+                              <Clock className="w-3 h-3" />
+                              {booking.duration}h
+                            </div>
                           </td>
-                          <td className="py-4 px-6 text-[#EEECF6] font-medium">
-                            ₹{booking.totalPrice}
+                          <td className="py-4 px-6">
+                            <span className="font-bold text-[#EEECF6]">
+                              ₹{booking.totalPrice}
+                            </span>
                           </td>
                           <td className="py-4 px-6">
                             <select
@@ -1007,12 +1066,12 @@ export default function AdminPanel() {
                               onChange={(e) =>
                                 handleUpdateBookingStatus(
                                   booking._id,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
-                              className={`px-3 py-1 rounded-lg text-sm font-medium ${getBookingStatusColor(
-                                booking.bookingStatus
-                              )} border-0 focus:ring-2 focus:ring-[#1B42CB]/20 focus:outline-none`}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${getBookingStatusColor(
+                                booking.bookingStatus,
+                              )} bg-[#191919]/50 focus:ring-2 focus:ring-[#FF2F6C]/20 focus:outline-none cursor-pointer transition-all duration-300`}
                             >
                               <option value="active">Active</option>
                               <option value="cancelled">Cancelled</option>
@@ -1029,9 +1088,9 @@ export default function AdminPanel() {
                                     name: `Booking by ${booking.userId?.name}`,
                                   })
                                 }
-                                className="px-4 py-2 bg-[#191919] border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-[#191919] border border-red-500/30 text-red-400 rounded-xl hover:bg-linear-to-r hover:from-red-500 hover:to-red-600 hover:text-white transition-all duration-300 flex items-center gap-2 group"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 Delete
                               </button>
                             </div>
@@ -1047,14 +1106,18 @@ export default function AdminPanel() {
         )}
       </div>
 
-      {/* Slot Form Modal */}
+      {/* Slot Form Modal - Premium Styling */}
       {showSlotForm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-xl bg-[#191919]/90 border border-[#1B42CB]/30 rounded-2xl w-full max-w-2xl shadow-2xl shadow-[#1B42CB]/10">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="backdrop-blur-xl bg-[#191919]/90 border border-[#1B42CB]/30 rounded-2xl w-full max-w-2xl shadow-2xl shadow-[#1B42CB]/20 transform animate-slideUp">
             <div className="p-6 border-b border-[#1B42CB]/20">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-[#EEECF6]">
-                  {editingSlotId ? "Edit Parking Slot" : "Add New Parking Slot"}
+                <h2 className="text-2xl font-bold">
+                  <span className="bg-linear-to-r from-[#EEECF6] to-[#FF2F6C] bg-clip-text text-transparent">
+                    {editingSlotId
+                      ? "Edit Parking Slot"
+                      : "Add New Parking Slot"}
+                  </span>
                 </h2>
                 <button
                   onClick={() => {
@@ -1062,17 +1125,18 @@ export default function AdminPanel() {
                     setSlotForm({});
                     setEditingSlotId(null);
                   }}
-                  className="w-8 h-8 rounded-lg bg-[#191919] border border-[#1B42CB]/30 flex items-center justify-center text-[#EEECF6] hover:bg-[#FF2F6C]/10 hover:border-[#FF2F6C]/30 transition-colors"
+                  className="w-10 h-10 rounded-xl bg-[#191919] border border-[#1B42CB]/30 flex items-center justify-center text-[#EEECF6] hover:bg-linear-to-r hover:from-[#FF2F6C] hover:to-[#1B42CB] hover:text-white transition-all duration-300 group"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
             </div>
 
             <form onSubmit={handleAddOrUpdateSlot} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-[#EEECF6] mb-2">
+                <div className="group">
+                  <label className="block text-sm font-medium text-[#EEECF6] mb-2 items-center gap-2">
+                    <Building2 className="w-4 h-4 text-[#1B42CB]" />
                     Slot Name *
                   </label>
                   <input
@@ -1082,12 +1146,13 @@ export default function AdminPanel() {
                     onChange={(e) =>
                       setSlotForm({ ...slotForm, name: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                     placeholder="Enter slot name"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#EEECF6] mb-2">
+                <div className="group">
+                  <label className="block text-sm font-medium text-[#EEECF6] mb-2 items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#FF2F6C]" />
                     Location *
                   </label>
                   <input
@@ -1100,11 +1165,11 @@ export default function AdminPanel() {
                         location: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                     placeholder="Enter location"
                   />
                 </div>
-                <div>
+                <div className="group">
                   <label className="block text-sm font-medium text-[#EEECF6] mb-2">
                     Price per Hour (₹) *
                   </label>
@@ -1120,11 +1185,11 @@ export default function AdminPanel() {
                         pricePerHour: Number(e.target.value),
                       })
                     }
-                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                     placeholder="Enter price"
                   />
                 </div>
-                <div>
+                <div className="group">
                   <label className="block text-sm font-medium text-[#EEECF6] mb-2">
                     Status
                   </label>
@@ -1133,14 +1198,14 @@ export default function AdminPanel() {
                     onChange={(e) =>
                       setSlotForm({ ...slotForm, status: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                   >
                     <option value="available">Available</option>
                     <option value="occupied">Occupied</option>
                     <option value="maintenance">Maintenance</option>
                   </select>
                 </div>
-                <div>
+                <div className="group">
                   <label className="block text-sm font-medium text-[#EEECF6] mb-2">
                     Total Capacity *
                   </label>
@@ -1155,11 +1220,11 @@ export default function AdminPanel() {
                         capacity: Number(e.target.value),
                       })
                     }
-                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                     placeholder="Enter total capacity"
                   />
                 </div>
-                <div>
+                <div className="group">
                   <label className="block text-sm font-medium text-[#EEECF6] mb-2">
                     Available Slots *
                   </label>
@@ -1174,7 +1239,7 @@ export default function AdminPanel() {
                         availableSlots: Number(e.target.value),
                       })
                     }
-                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300"
+                    className="w-full px-4 py-3 bg-[#191919]/50 border border-[#1B42CB]/30 rounded-xl text-[#EEECF6] focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300"
                     placeholder="Enter available slots"
                   />
                 </div>
@@ -1194,9 +1259,9 @@ export default function AdminPanel() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#FF2F6C]/20 transition-all duration-300 flex items-center gap-2"
+                  className="px-6 py-3 bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#FF2F6C]/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2 group"
                 >
-                  <Check className="w-5 h-5" />
+                  <Check className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   {editingSlotId ? "Update Slot" : "Add Slot"}
                 </button>
               </div>
@@ -1205,14 +1270,14 @@ export default function AdminPanel() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Premium Styling */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-xl bg-[#191919]/90 border border-red-500/30 rounded-2xl w-full max-w-md shadow-2xl shadow-red-500/10">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="backdrop-blur-xl bg-[#191919]/90 border border-red-500/30 rounded-2xl w-full max-w-md shadow-2xl shadow-red-500/10 transform animate-slideUp">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-red-400" />
+                <div className="w-14 h-14 rounded-xl bg-linear-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+                  <AlertCircle className="w-7 h-7 text-white" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-[#EEECF6]">
@@ -1226,12 +1291,13 @@ export default function AdminPanel() {
               </div>
 
               <div className="mb-6 p-4 bg-[#191919]/50 rounded-xl border border-red-500/20">
-                <div className="font-medium text-[#EEECF6]">
+                <div className="font-medium text-[#EEECF6] flex items-center gap-2">
+                  <Trash2 className="w-4 h-4 text-red-400" />
                   {showDeleteConfirm.name}
                 </div>
-                <div className="text-sm text-[#EEECF6]/60 mt-1">
-                  This action cannot be undone. All associated data will be
-                  permanently removed.
+                <div className="text-sm text-[#EEECF6]/40 mt-2 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  This action cannot be undone
                 </div>
               </div>
 
@@ -1252,20 +1318,57 @@ export default function AdminPanel() {
                       handleDeleteBooking(showDeleteConfirm.id);
                     }
                   }}
-                  className="flex-1 px-6 py-3 bg-linear-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300"
+                  className="flex-1 px-6 py-3 bg-linear-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
                 >
-                  Delete{" "}
-                  {showDeleteConfirm.type === "parking"
-                    ? "Slot"
-                    : showDeleteConfirm.type === "user"
-                    ? "User"
-                    : "Booking"}
+                  <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Delete
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Custom Animations */}
+      <style>{`
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradient 3s ease infinite;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+          20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
