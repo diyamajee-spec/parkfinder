@@ -1,12 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MapComponent from "./MapComponent";
+import * as Icons from "lucide-react";
 
 const HomePage: React.FC = () => {
   const [activeSection, setActiveSection] = useState(0);
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Detect system theme
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    setTheme(mediaQuery.matches ? 'light' : 'dark');
+
+    const handler = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? 'light' : 'dark');
+    };
+    
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
 
   interface ParkingSlot {
     [key: string]: unknown;
@@ -29,14 +44,15 @@ const HomePage: React.FC = () => {
     { lat: 28.618, lng: 77.213 }, // Slot 9
     { lat: 28.6095, lng: 77.204 }, // Slot 10
   ];
+  
   const API = import.meta.env.VITE_API_URL;
+  
   const fetchParkingSlots = async () => {
     try {
       const response = await fetch(`${API}/api/parking`);
       const result = await response.json();
 
       if (result.success) {
-        // Add coordinates to each parking slot
         const slotsWithCoordinates = result.data.map(
           (slot: ParkingSlot, index: number) => ({
             ...slot,
@@ -51,7 +67,6 @@ const HomePage: React.FC = () => {
         setError(result.message);
       }
     } catch (err) {
-      // Normalize unknown error to a string message
       setError(err instanceof Error ? err.message : String(err));
       console.error(err);
     } finally {
@@ -89,25 +104,25 @@ const HomePage: React.FC = () => {
 
   const features = [
     {
-      icon: "🚗",
+      icon: Icons.MapPin,
       title: "Real-Time Availability",
       description: "See live parking slot availability updated every minute",
       color: "from-[#1B42CB] to-[#1B42CB]/80",
     },
     {
-      icon: "📍",
+      icon: Icons.Navigation,
       title: "Smart Navigation",
       description: "Get turn-by-turn directions to your booked parking spot",
       color: "from-[#FF2F6C] to-[#FF2F6C]/80",
     },
     {
-      icon: "💰",
+      icon: Icons.Shield,
       title: "Best Price Guarantee",
       description: "We guarantee the best parking rates in your area",
       color: "from-[#1B42CB] to-[#FF2F6C]",
     },
     {
-      icon: "🛡️",
+      icon: Icons.Lock,
       title: "Secure Parking",
       description: "24/7 surveillance and security at all our locations",
       color: "from-[#FF2F6C] to-[#1B42CB]",
@@ -119,25 +134,60 @@ const HomePage: React.FC = () => {
       name: "Alex Johnson",
       role: "Daily Commuter",
       content:
-        "Saves me 15 minutes every morning finding parking near my office!",
+        "Saves me 15 minutes every morning finding parking near my office",
       rating: 5,
     },
     {
       name: "Sarah Chen",
       role: "Event Planner",
-      content: "Perfect for finding parking during crowded city events.",
+      content: "Perfect for finding parking during crowded city events",
       rating: 5,
     },
     {
       name: "Mike Rodriguez",
       role: "Business Traveler",
-      content: "The real-time updates make business trips so much smoother.",
+      content: "The real-time updates make business trips so much smoother",
       rating: 4,
     },
   ];
 
+  // Theme-based classes
+  const getThemeClasses = () => {
+    return theme === 'light' 
+      ? {
+          bg: 'bg-gray-50',
+          text: 'text-gray-900',
+          textSecondary: 'text-gray-600',
+          border: 'border-gray-200',
+          cardBg: 'bg-white',
+          cardBorder: 'border-gray-200',
+          overlay: 'bg-black/5',
+          linear: {
+            primary: 'from-blue-600 to-blue-500',
+            secondary: 'from-pink-600 to-pink-500',
+            accent: 'from-blue-600 to-pink-600'
+          }
+        }
+      : {
+          bg: 'bg-[#191919]',
+          text: 'text-[#EEECF6]',
+          textSecondary: 'text-[#EEECF6]/70',
+          border: 'border-[#1B42CB]/20',
+          cardBg: 'bg-[#191919]/40',
+          cardBorder: 'border-[#1B42CB]/20',
+          overlay: 'bg-black/40',
+          linear: {
+            primary: 'from-[#1B42CB] to-[#1B42CB]/80',
+            secondary: 'from-[#FF2F6C] to-[#FF2F6C]/80',
+            accent: 'from-[#1B42CB] to-[#FF2F6C]'
+          }
+        };
+  };
+
+  const themeClasses = getThemeClasses();
+
   return (
-    <div className="relative bg-linear-to-br from-[#191919] via-[#0f0f0f] to-[#191919]">
+    <div className={`relative ${themeClasses.bg} transition-colors duration-300`}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#1B42CB]/10 rounded-full blur-3xl animate-pulse"></div>
@@ -153,15 +203,15 @@ const HomePage: React.FC = () => {
             onClick={() => scrollToSection(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               activeSection === index
-                ? "bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] scale-125"
-                : "bg-[#EEECF6]/30 hover:bg-[#EEECF6]/50"
+                ? `bg-linear-to-r ${themeClasses.linear.accent} scale-125`
+                : "bg-gray-400/30 hover:bg-gray-400/50"
             }`}
             aria-label={`Go to section ${index + 1}`}
           />
         ))}
       </div>
 
-      {/* Hero Section - Premium Parking Platform */}
+      {/* Hero Section */}
       <section className="home-section min-h-screen flex items-center justify-center relative px-4 py-16 md:py-24">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden">
@@ -171,32 +221,32 @@ const HomePage: React.FC = () => {
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-            {/* Left Content - Enhanced */}
+            {/* Left Content */}
             <div className="flex-1 text-center lg:text-left">
-              {/* Premium Badge */}
-              <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-linear-to-br from-[#1B42CB]/20 to-[#FF2F6C]/20 border border-[#FFFFFF]/20 backdrop-blur-sm mb-8">
+              {/* Platform Badge */}
+              <div className={`inline-flex items-center gap-3 px-5 py-3 rounded-full bg-linear-to-br from-[#1B42CB]/20 to-[#FF2F6C]/20 border ${themeClasses.border} backdrop-blur-sm mb-8`}>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-[#00FF88] animate-pulse"></span>
-                  <span className="text-base font-semibold text-white tracking-wide">
-                    🚀 #1 Rated Parking Platform
+                  <Icons.Car className="w-5 h-5 text-[#1B42CB]" />
+                  <span className={`text-base font-semibold ${themeClasses.text} tracking-wide`}>
+                    #1 Rated Parking Platform
                   </span>
-                  <span className="text-sm text-gray-300">| Live 24/7</span>
+                  <span className={`text-sm ${themeClasses.textSecondary}`}>24/7</span>
                 </div>
               </div>
 
               {/* Main Heading */}
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 <span className="block">
-                  <span className="bg-linear-to-br from-white via-[#1B42CB] to-[#FF2F6C] bg-clip-text text-transparent">
+                  <span className="bg-linear-to-br from-gray-900 via-[#1B42CB] to-[#FF2F6C] bg-clip-text text-transparent dark:from-white">
                     INSTANT PARKING
                   </span>
                 </span>
                 <span className="block mt-2">
                   <span className="relative">
-                    <span className="bg-linear-to-br from-[#FF2F6C] via-[#1B42CB] to-white bg-clip-text text-transparent">
+                    <span className="bg-linear-to-br from-[#FF2F6C] via-[#1B42CB] to-gray-900 bg-clip-text text-transparent dark:to-white">
                       ANYWHERE, ANYTIME
                     </span>
-                    <span className="absolute -bottom-2 left-0 w-full h-1 bg-linear-to-br from-[#FF2F6C] to-[#1B42CB] rounded-full"></span>
+                    <span className={`absolute -bottom-2 left-0 w-full h-1 bg-linear-to-br from-[#FF2F6C] to-[#1B42CB] rounded-full`}></span>
                   </span>
                 </span>
               </h1>
@@ -204,23 +254,23 @@ const HomePage: React.FC = () => {
               {/* Stats Counter */}
               <div className="flex flex-wrap items-center gap-6 mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl font-bold text-white">98%</div>
-                  <div className="text-gray-400">Occupancy Rate</div>
+                  <div className={`text-3xl font-bold ${themeClasses.text}`}>98%</div>
+                  <div className={themeClasses.textSecondary}>Occupancy Rate</div>
                 </div>
                 <div className="h-6 w-px bg-gray-700"></div>
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl font-bold text-white">24/7</div>
-                  <div className="text-gray-400">Support</div>
+                  <div className={`text-3xl font-bold ${themeClasses.text}`}>24/7</div>
+                  <div className={themeClasses.textSecondary}>Support</div>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-xl text-gray-300 mb-10 max-w-2xl leading-relaxed">
-                <span className="font-semibold text-white">
+              <p className={`text-xl ${themeClasses.textSecondary} mb-10 max-w-2xl leading-relaxed`}>
+                <span className={`font-semibold ${themeClasses.text}`}>
                   Real-time parking analytics
                 </span>{" "}
                 with
-                <span className="text-[#00FF88]"> AI-powered predictions</span>.
+                <span className="text-green-500"> real-time updates</span>.
                 Reserve spots before you arrive, get{" "}
                 <span className="text-[#FF2F6C]">priority access</span>, and pay
                 seamlessly.
@@ -230,21 +280,19 @@ const HomePage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-5 mb-12">
                 <Link
                   to="/parkingslots"
-                  className="group px-10 py-5 bg-linear-to-br from-[#1B42CB] via-[#6C3BFF] to-[#FF2F6C] text-white font-bold rounded-2xl text-lg hover:shadow-2xl hover:shadow-[#FF2F6C]/30 transition-all duration-500 transform hover:-translate-y-1 hover:scale-[1.02] flex items-center justify-center gap-3"
+                  className={`group px-10 py-5 bg-linear-to-br from-[#1B42CB] via-[#6C3BFF] to-[#FF2F6C] text-white font-bold rounded-2xl text-lg hover:shadow-2xl hover:shadow-[#FF2F6C]/30 transition-all duration-500 transform hover:-translate-y-1 hover:scale-[1.02] flex items-center justify-center gap-3`}
                 >
-                  <span>Find Parking Instantly</span>
-                  <span className="group-hover:translate-x-2 transition-transform">
-                    →
-                  </span>
+                  <span>Find Parking</span>
+                  <Icons.ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </div>
             </div>
 
-            {/* Right Side - Premium Parking Card */}
+            {/* Right Side - Parking Card */}
             <div className="flex-1 w-full">
               <div className="relative max-w-md mx-auto lg:mx-0">
                 {/* Main Card */}
-                <div className="backdrop-blur-2xl bg-linear-to-br from-black/40 to-[#0A0A0A]/60 border border-white/10 rounded-3xl p-8 shadow-2xl shadow-[#1B42CB]/20 overflow-hidden">
+                <div className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-3xl p-8 shadow-2xl shadow-[#1B42CB]/20 overflow-hidden`}>
                   {/* Glowing Effect */}
                   <div className="absolute top-0 right-0 w-64 h-64 bg-[#FF2F6C]/10 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
 
@@ -253,37 +301,37 @@ const HomePage: React.FC = () => {
                     <div className="flex items-start justify-between mb-8">
                       <div>
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] rounded-xl flex items-center justify-center">
-                            <span className="text-2xl">🏢</span>
+                          <div className={`w-12 h-12 bg-linear-to-br ${themeClasses.linear.accent} rounded-xl flex items-center justify-center`}>
+                            <Icons.Building2 className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-2xl font-bold text-white">
+                            <h3 className={`text-2xl font-bold ${themeClasses.text}`}>
                               Platinum Tower
                             </h3>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-400">
-                                Downtown • Premium
+                              <span className={`text-sm ${themeClasses.textSecondary}`}>
+                                Downtown
                               </span>
-                              <span className="px-2 py-1 bg-[#00FF88]/20 text-[#00FF88] text-xs rounded-full">
-                                TOP RATED
-                              </span>
-                            </div>
+                              <span className="px-2 py-1 bg-green-500/20 text-green-500 text-xs rounded-full">
+                TOP RATED
+              </span>
+            </div>
                           </div>
                         </div>
                       </div>
-                      <button className="p-3 hover:bg-white/10 rounded-xl transition-colors">
-                        <span className="text-2xl">⭐</span>
+                      <button className={`p-3 hover:${themeClasses.overlay} rounded-xl transition-colors`}>
+                        <Icons.Star className={`w-5 h-5 ${themeClasses.textSecondary}`} />
                       </button>
                     </div>
 
                     {/* Live Availability */}
-                    <div className="bg-linear-to-br from-black/30 to-black/50 rounded-2xl p-6 mb-6 border border-white/10">
+                    <div className={`bg-linear-to-br from-black/30 to-black/50 rounded-2xl p-6 mb-6 ${themeClasses.cardBorder} border`}>
                       <div className="flex justify-between items-center mb-4">
                         <div>
-                          <div className="text-gray-400 text-sm">
+                          <div className={`text-sm ${themeClasses.textSecondary}`}>
                             LIVE AVAILABILITY
                           </div>
-                          <div className="text-3xl font-bold text-white mt-1">
+                          <div className={`text-3xl font-bold ${themeClasses.text} mt-1`}>
                             12/24
                           </div>
                         </div>
@@ -306,7 +354,7 @@ const HomePage: React.FC = () => {
                                 cy="50"
                                 r="40"
                                 fill="none"
-                                stroke="url(#gradient)"
+                                stroke="url(#linear)"
                                 strokeWidth="8"
                                 strokeLinecap="round"
                                 strokeDasharray="251.2"
@@ -315,7 +363,7 @@ const HomePage: React.FC = () => {
                               />
                               <defs>
                                 <linearGradient
-                                  id="gradient"
+                                  id="linear"
                                   x1="0%"
                                   y1="0%"
                                   x2="100%"
@@ -328,14 +376,14 @@ const HomePage: React.FC = () => {
                             </svg>
                           </div>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">
+                            <span className={`text-white font-bold text-lg`}>
                               50%
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-gray-400 text-sm">
+                        <div className={`text-sm ${themeClasses.textSecondary}`}>
                           Updated 2 mins ago
                         </div>
                       </div>
@@ -343,44 +391,46 @@ const HomePage: React.FC = () => {
 
                     {/* Quick Info Grid */}
                     <div className="grid grid-cols-2 gap-4 mb-8">
-                      <div className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
-                        <div className="text-gray-400 text-sm mb-1">RATE</div>
-                        <div className="text-2xl font-bold text-white">
+                      <div className={`bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors`}>
+                        <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>RATE</div>
+                        <div className={`text-2xl font-bold ${themeClasses.text}`}>
                           ₹80/hr
                         </div>
-                        <div className="text-gray-500 text-xs">
+                        <div className={`text-xs ${themeClasses.textSecondary}`}>
                           ₹500 day max
                         </div>
                       </div>
-                      <div className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
-                        <div className="text-gray-400 text-sm mb-1">
+                      <div className={`bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors`}>
+                        <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
                           DISTANCE
                         </div>
-                        <div className="text-2xl font-bold text-white">
+                        <div className={`text-2xl font-bold ${themeClasses.text}`}>
                           0.8 km
                         </div>
-                        <div className="text-gray-500 text-xs">
+                        <div className={`text-xs ${themeClasses.textSecondary}`}>
                           10 min walk
                         </div>
                       </div>
-                      <div className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
-                        <div className="text-gray-400 text-sm mb-1">TYPE</div>
-                        <div className="text-2xl font-bold text-white">
+                      <div className={`bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors`}>
+                        <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>TYPE</div>
+                        <div className={`text-2xl font-bold ${themeClasses.text}`}>
                           COVERED
                         </div>
-                        <div className="text-gray-500 text-xs">
+                        <div className={`text-xs ${themeClasses.textSecondary}`}>
                           EV Charging
                         </div>
                       </div>
-                      <div className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
-                        <div className="text-gray-400 text-sm mb-1">RATING</div>
+                      <div className={`bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors`}>
+                        <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>RATING</div>
                         <div className="flex items-center gap-1">
-                          <span className="text-2xl font-bold text-white">
+                          <span className={`text-2xl font-bold ${themeClasses.text}`}>
                             4.8
                           </span>
-                          <span className="text-yellow-400">★★★★★</span>
+                          <span className="text-yellow-400">
+                            {Array(5).fill('★').join('')}
+                          </span>
                         </div>
-                        <div className="text-gray-500 text-xs">420 reviews</div>
+                        <div className={`text-xs ${themeClasses.textSecondary}`}>420 reviews</div>
                       </div>
                     </div>
                   </div>
@@ -388,26 +438,26 @@ const HomePage: React.FC = () => {
 
                 {/* Floating Elements */}
                 <div className="absolute -top-8 -left-8 w-24 h-24 backdrop-blur-xl bg-linear-to-br from-[#FF2F6C]/10 to-[#FF2F6C]/5 border border-[#FF2F6C]/30 rounded-2xl flex items-center justify-center animate-float">
-                  <span className="text-3xl">📍</span>
+                  <Icons.MapPin className="w-8 h-8 text-[#FF2F6C]" />
                 </div>
                 <div className="absolute -bottom-8 -right-8 w-20 h-20 backdrop-blur-xl bg-linear-to-br from-[#1B42CB]/10 to-[#1B42CB]/5 border border-[#1B42CB]/30 rounded-2xl flex items-center justify-center animate-float delay-1000">
-                  <span className="text-3xl">⚡</span>
+                  <Icons.Zap className="w-6 h-6 text-[#1B42CB]" />
                 </div>
 
                 {/* Live Badge */}
-                <div className="absolute -top-3 right-8 px-4 py-1.5 bg-linear-to-br from-[#00FF88] to-[#00CC66] text-black font-bold rounded-full text-sm flex items-center gap-2 animate-pulse">
-                  <span className="w-2 h-2 bg-black rounded-full"></span>
+                <div className="absolute -top-3 right-8 px-4 py-1.5 bg-linear-to-br from-green-500 to-green-600 text-white font-bold rounded-full text-sm flex items-center gap-2 animate-pulse">
+                  <span className="w-2 h-2 bg-white rounded-full"></span>
                   LIVE
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Live map section */}
-          <div className="backdrop-blur-xl bg-[#191919]/40 border border-[#1B42CB]/20 rounded-3xl p-8 md:p-12 mt-16">
+          {/* How it works section */}
+          <div className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-3xl p-8 md:p-12 mt-16`}>
             <div className="flex flex-col lg:flex-row items-center gap-8">
               <div className="flex-1">
-                <h3 className="text-2xl md:text-3xl font-bold text-[#EEECF6] mb-4">
+                <h3 className={`text-2xl md:text-3xl font-bold ${themeClasses.text} mb-4`}>
                   How It Works
                 </h3>
                 <div className="space-y-6">
@@ -416,34 +466,36 @@ const HomePage: React.FC = () => {
                       step: "1",
                       title: "Search & Filter",
                       desc: "Find parking spots by location, price, and availability",
+                      icon: Icons.Search
                     },
                     {
                       step: "2",
                       title: "Book Instantly",
                       desc: "Reserve your spot with one click, no waiting required",
+                      icon: Icons.CalendarCheck
                     },
                     {
                       step: "3",
                       title: "Navigate & Park",
                       desc: "Get directions and park in your reserved spot",
+                      icon: Icons.Navigation
                     },
                     {
                       step: "4",
                       title: "Pay Securely",
                       desc: "Automatic payment with multiple secure options",
+                      icon: Icons.Shield
                     },
                   ].map((item) => (
                     <div key={item.step} className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center shrink-0">
-                        <span className="font-bold text-white">
-                          {item.step}
-                        </span>
+                      <div className={`w-10 h-10 rounded-lg bg-linear-to-r ${themeClasses.linear.accent} flex items-center justify-center shrink-0`}>
+                        <item.icon className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <div className="font-bold text-[#EEECF6] mb-1">
+                        <div className={`font-bold ${themeClasses.text} mb-1`}>
                           {item.title}
                         </div>
-                        <div className="text-[#EEECF6]/70">{item.desc}</div>
+                        <div className={themeClasses.textSecondary}>{item.desc}</div>
                       </div>
                     </div>
                   ))}
@@ -465,29 +517,29 @@ const HomePage: React.FC = () => {
           {/* Bottom Indicators */}
           <div className="mt-16 flex flex-wrap justify-center gap-8">
             <div className="text-center">
-              <div className="text-white font-bold text-2xl">🏆</div>
-              <div className="text-gray-400 text-sm mt-2">Award Winning</div>
+              <Icons.Trophy className={`w-8 h-8 ${themeClasses.text} mx-auto`} />
+              <div className={`text-sm ${themeClasses.textSecondary} mt-2`}>Award Winning</div>
             </div>
             <div className="text-center">
-              <div className="text-white font-bold text-2xl">🔐</div>
-              <div className="text-gray-400 text-sm mt-2">
+              <Icons.Shield className={`w-8 h-8 ${themeClasses.text} mx-auto`} />
+              <div className={`text-sm ${themeClasses.textSecondary} mt-2`}>
                 Bank-Level Security
               </div>
             </div>
             <div className="text-center">
-              <div className="text-white font-bold text-2xl">🌍</div>
-              <div className="text-gray-400 text-sm mt-2">15+ Cities</div>
+              <Icons.Globe className={`w-8 h-8 ${themeClasses.text} mx-auto`} />
+              <div className={`text-sm ${themeClasses.textSecondary} mt-2`}>15+ Cities</div>
             </div>
             <div className="text-center">
-              <div className="text-white font-bold text-2xl">📱</div>
-              <div className="text-gray-400 text-sm mt-2">Mobile First</div>
+              <Icons.Smartphone className={`w-8 h-8 ${themeClasses.text} mx-auto`} />
+              <div className={`text-sm ${themeClasses.textSecondary} mt-2`}>Mobile First</div>
             </div>
           </div>
         </div>
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="text-white text-2xl">↓</div>
+          <Icons.ChevronDown className={`w-6 h-6 ${themeClasses.text}`} />
         </div>
       </section>
 
@@ -495,78 +547,82 @@ const HomePage: React.FC = () => {
       <section className="home-section min-h-screen flex items-center relative px-4 py-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1B42CB]/10 border border-[#1B42CB]/30 mb-4">
-              <span className="text-sm font-medium text-[#EEECF6]">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1B42CB]/10 border ${themeClasses.border} mb-4`}>
+              <span className={`text-sm font-medium ${themeClasses.text}`}>
                 Why Choose Us
               </span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              <span className="bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] bg-clip-text text-transparent">
+              <span className={`bg-linear-to-r ${themeClasses.linear.accent} bg-clip-text text-transparent`}>
                 Features That Make
               </span>
               <br />
-              <span className="text-[#EEECF6]">Parking Effortless</span>
+              <span className={themeClasses.text}>Parking Effortless</span>
             </h2>
-            <p className="text-lg text-[#EEECF6]/70 max-w-2xl mx-auto">
-              Our platform combines cutting-edge technology with user-friendly
+            <p className={`text-lg ${themeClasses.textSecondary} max-w-2xl mx-auto`}>
+              Our platform combines technology with user-friendly
               design to transform your parking experience.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="group backdrop-blur-xl bg-[#191919]/40 border border-[#1B42CB]/20 rounded-2xl p-6 hover:border-[#FF2F6C]/40 hover:shadow-2xl hover:shadow-[#FF2F6C]/10 transition-all duration-500 transform hover:-translate-y-2"
-              >
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
                 <div
-                  className={`w-16 h-16 rounded-xl bg-linear-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  key={index}
+                  className={`group backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-2xl p-6 hover:border-[#FF2F6C]/40 hover:shadow-2xl hover:shadow-[#FF2F6C]/10 transition-all duration-500 transform hover:-translate-y-2`}
                 >
-                  <span className="text-2xl">{feature.icon}</span>
+                  <div
+                    className={`w-16 h-16 rounded-xl bg-linear-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
+                    <IconComponent className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className={`text-xl font-bold ${themeClasses.text} mb-3`}>
+                    {feature.title}
+                  </h3>
+                  <p className={themeClasses.textSecondary}>{feature.description}</p>
                 </div>
-                <h3 className="text-xl font-bold text-[#EEECF6] mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-[#EEECF6]/70">{feature.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Trust Badges */}
-      <div className="flex flex-wrap items-center gap-8 pt-8 border-t border-white/10 justify-center max-w-7xl mx-auto px-4 py-12">
+      <div className={`flex flex-wrap items-center gap-8 pt-8 border-t ${themeClasses.border} justify-center max-w-7xl mx-auto px-4 py-12`}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-linear-to-br from-[#00FF88]/20 to-[#00FF88]/10 rounded-lg flex items-center justify-center">
-            <span className="text-xl">🔒</span>
+          <div className="w-10 h-10 bg-linear-to-br from-green-500/20 to-green-500/10 rounded-lg flex items-center justify-center">
+            <Icons.Lock className="w-5 h-5 text-green-500" />
           </div>
           <div>
-            <div className="text-white font-medium">Secure Booking</div>
-            <div className="text-sm text-gray-400">Encrypted Payments</div>
+            <div className={`font-medium ${themeClasses.text}`}>Secure Booking</div>
+            <div className={`text-sm ${themeClasses.textSecondary}`}>Encrypted Payments</div>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-linear-to-br from-[#FF2F6C]/20 to-[#FF2F6C]/10 rounded-lg flex items-center justify-center">
-            <span className="text-xl">⚡</span>
+            <Icons.Zap className="w-5 h-5 text-[#FF2F6C]" />
           </div>
           <div>
-            <div className="text-white font-medium">Instant Entry</div>
-            <div className="text-sm text-gray-400">QR Code Access</div>
+            <div className={`font-medium ${themeClasses.text}`}>Instant Entry</div>
+            <div className={`text-sm ${themeClasses.textSecondary}`}>QR Code Access</div>
           </div>
         </div>
       </div>
+
       {/* Testimonials Section */}
       <section className="home-section min-h-screen flex items-center relative px-4 py-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF2F6C]/10 border border-[#FF2F6C]/30 mb-4">
-              <span className="text-sm font-medium text-[#EEECF6]">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF2F6C]/10 border ${themeClasses.border} mb-4`}>
+              <span className={`text-sm font-medium ${themeClasses.text}`}>
                 User Stories
               </span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              <span className="text-[#EEECF6]">Loved by</span>
-              <span className="bg-linear-to-r from-[#FF2F6C] to-[#1B42CB] bg-clip-text text-transparent">
+              <span className={themeClasses.text}>Loved by</span>
+              <span className={`bg-linear-to-r ${themeClasses.linear.accent} bg-clip-text text-transparent`}>
                 {" "}
                 Thousands
               </span>
@@ -577,34 +633,32 @@ const HomePage: React.FC = () => {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="backdrop-blur-xl bg-[#191919]/40 border border-[#1B42CB]/20 rounded-2xl p-6 hover:border-[#FF2F6C]/40 transition-all duration-300"
+                className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-2xl p-6 hover:border-[#FF2F6C]/40 transition-all duration-300`}
               >
                 <div className="flex items-center gap-2 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <span
+                    <Icons.Star
                       key={i}
-                      className={`text-lg ${
+                      className={`w-4 h-4 ${
                         i < testimonial.rating
-                          ? "text-[#FF2F6C]"
-                          : "text-[#EEECF6]/30"
+                          ? "text-[#FF2F6C] fill-current"
+                          : themeClasses.textSecondary
                       }`}
-                    >
-                      ★
-                    </span>
+                    />
                   ))}
                 </div>
-                <p className="text-[#EEECF6]/80 mb-6 italic">
+                <p className={`${themeClasses.textSecondary} mb-6 italic`}>
                   "{testimonial.content}"
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-linear-to-r from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center">
-                    <span className="text-lg">👤</span>
+                  <div className={`w-12 h-12 rounded-full bg-linear-to-r ${themeClasses.linear.accent} flex items-center justify-center`}>
+                    <Icons.User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="font-bold text-[#EEECF6]">
+                    <div className={`font-bold ${themeClasses.text}`}>
                       {testimonial.name}
                     </div>
-                    <div className="text-sm text-[#EEECF6]/60">
+                    <div className={`text-sm ${themeClasses.textSecondary}`}>
                       {testimonial.role}
                     </div>
                   </div>
@@ -613,18 +667,18 @@ const HomePage: React.FC = () => {
             ))}
           </div>
 
-          <div className="backdrop-blur-xl bg-linear-to-r from-[#1B42CB]/10 to-[#FF2F6C]/10 border border-[#1B42CB]/20 rounded-3xl p-8 md:p-12 text-center">
-            <h3 className="text-2xl md:text-3xl font-bold text-[#EEECF6] mb-4">
+          <div className={`backdrop-blur-xl bg-linear-to-r from-[#1B42CB]/10 to-[#FF2F6C]/10 ${themeClasses.cardBorder} border rounded-3xl p-8 md:p-12 text-center`}>
+            <h3 className={`text-2xl md:text-3xl font-bold ${themeClasses.text} mb-4`}>
               Ready to Transform Your Parking Experience?
             </h3>
-            <p className="text-lg text-[#EEECF6]/70 mb-8 max-w-2xl mx-auto">
+            <p className={`text-lg ${themeClasses.textSecondary} mb-8 max-w-2xl mx-auto`}>
               Join thousands of satisfied users who have made parking
-              stress-free with our intelligent platform.
+              stress-free with our platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/bookings"
-                className="px-8 py-4 bg-[#191919]/50 border border-[#1B42CB]/30 text-[#EEECF6] font-bold rounded-xl hover:bg-[#1B42CB]/10 transition-all duration-300"
+                className={`px-8 py-4 bg-black/5 border ${themeClasses.border} ${themeClasses.text} font-bold rounded-xl hover:bg-[#1B42CB]/10 transition-all duration-300`}
               >
                 View Bookings
               </Link>
@@ -636,43 +690,43 @@ const HomePage: React.FC = () => {
       {/* Footer Section */}
       <section className="home-section min-h-screen flex items-center relative px-4 py-20">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="backdrop-blur-xl bg-[#191919]/40 border border-[#1B42CB]/20 rounded-3xl p-8 md:p-12">
+          <div className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-3xl p-8 md:p-12`}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#1B42CB] to-[#FF2F6C] flex items-center justify-center">
-                    <span className="text-xl">🚗</span>
+                  <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${themeClasses.linear.accent} flex items-center justify-center`}>
+                    <Icons.Car className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-[#EEECF6]">
+                    <h2 className={`text-2xl font-bold ${themeClasses.text}`}>
                       SmartPark
                     </h2>
-                    <p className="text-[#EEECF6]/60">
-                      Intelligent Parking Solutions
+                    <p className={themeClasses.textSecondary}>
+                      Parking Solutions
                     </p>
                   </div>
                 </div>
-                <p className="text-[#EEECF6]/70 mb-8">
+                <p className={`${themeClasses.textSecondary} mb-8`}>
                   We're on a mission to make urban parking stress-free,
                   efficient, and accessible for everyone. Our technology
                   connects drivers with available parking spots in real-time.
                 </p>
                 <div className="flex gap-4">
-                  <button className="w-10 h-10 rounded-lg bg-[#191919]/50 border border-[#1B42CB]/30 flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors">
-                    <span className="text-lg">📱</span>
+                  <button className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}>
+                    <Icons.Smartphone className={`w-5 h-5 ${themeClasses.textSecondary}`} />
                   </button>
-                  <button className="w-10 h-10 rounded-lg bg-[#191919]/50 border border-[#1B42CB]/30 flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors">
-                    <span className="text-lg">📧</span>
+                  <button className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}>
+                    <Icons.Mail className={`w-5 h-5 ${themeClasses.textSecondary}`} />
                   </button>
-                  <button className="w-10 h-10 rounded-lg bg-[#191919]/50 border border-[#1B42CB]/30 flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors">
-                    <span className="text-lg">📘</span>
+                  <button className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}>
+                    <Icons.MessageCircle className={`w-5 h-5 ${themeClasses.textSecondary}`} />
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <h3 className="font-bold text-[#EEECF6] mb-4">Quick Links</h3>
+                  <h3 className={`font-bold ${themeClasses.text} mb-4`}>Quick Links</h3>
                   <ul className="space-y-3">
                     {[
                       "Parking Slots",
@@ -683,7 +737,7 @@ const HomePage: React.FC = () => {
                       <li key={item}>
                         <a
                           href="#"
-                          className="text-[#EEECF6]/70 hover:text-[#EEECF6] transition-colors"
+                          className={`${themeClasses.textSecondary} hover:${themeClasses.text} transition-colors`}
                         >
                           {item}
                         </a>
@@ -692,8 +746,8 @@ const HomePage: React.FC = () => {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#EEECF6] mb-4">Contact</h3>
-                  <ul className="space-y-3 text-[#EEECF6]/70">
+                  <h3 className={`font-bold ${themeClasses.text} mb-4`}>Contact</h3>
+                  <ul className={`space-y-3 ${themeClasses.textSecondary}`}>
                     <li>support@smartpark.com</li>
                     <li>+91 98765 43210</li>
                     <li>24/7 Support Available</li>
@@ -702,11 +756,11 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-12 pt-8 border-t border-[#1B42CB]/20 text-center">
-              <p className="text-[#EEECF6]/60">
+            <div className={`mt-12 pt-8 border-t ${themeClasses.border} text-center`}>
+              <p className={themeClasses.textSecondary}>
                 © {new Date().getFullYear()} SmartPark. All rights reserved.
               </p>
-              <p className="text-sm text-[#EEECF6]/40 mt-2">
+              <p className={`text-sm ${themeClasses.textSecondary} mt-2`}>
                 Making parking better, one spot at a time.
               </p>
             </div>
