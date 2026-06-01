@@ -631,7 +631,7 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* Footer Section */}
-      <section className="home-section min-h-screen flex items-center relative px-4 py-20">
+      <section className="home-section relative px-4 py-10">
         <div className="max-w-7xl mx-auto w-full">
           <div
             className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-3xl p-8 md:p-12`}
