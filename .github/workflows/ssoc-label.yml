@@ -1,10 +1,13 @@
 name: Add SSoC26 Label
 
 on:
+  issues:
+    types: [opened]
   pull_request_target:
     types: [opened]
 
 permissions:
+  issues: write
   pull-requests: write
 
 jobs:
