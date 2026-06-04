@@ -651,27 +651,30 @@ const HomePage: React.FC = () => {
                   connects drivers with available parking spots in real-time.
                 </p>
                 <div className="flex gap-4">
-                  <button
-                    className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
-                  >
-                    <Icons.Smartphone
-                      className={`w-5 h-5 ${themeClasses.textSecondary}`}
-                    />
-                  </button>
-                  <button
-                    className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
-                  >
-                    <Icons.Mail
-                      className={`w-5 h-5 ${themeClasses.textSecondary}`}
-                    />
-                  </button>
-                  <button
-                    className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
-                  >
-                    <Icons.MessageCircle
-                      className={`w-5 h-5 ${themeClasses.textSecondary}`}
-                    />
-                  </button>
+                  <a
+  href="tel:+919876543210"
+  className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
+>
+  <Icons.Smartphone
+    className={`w-5 h-5 ${themeClasses.textSecondary}`}
+  />
+</a>
+                  <a
+  href="mailto:support@smartpark.com"
+  className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
+>
+  <Icons.Mail
+    className={`w-5 h-5 ${themeClasses.textSecondary}`}
+  />
+</a>
+                  <a
+  href="sms:+919876543210"
+  className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 hover:scale-110 transition-all duration-200`}
+>
+  <Icons.MessageCircle
+    className={`w-5 h-5 ${themeClasses.textSecondary}`}
+  />
+</a>
                 </div>
               </div>
 
@@ -690,7 +693,7 @@ const HomePage: React.FC = () => {
                       <li key={item}>
                         <a
                           href="#"
-                          className={`${themeClasses.textSecondary} hover:${themeClasses.text} transition-colors`}
+                          className={`${themeClasses.textSecondary} transition-all duration-200 hover:text-[#FF2F6C] hover:translate-x-1 inline-block`}
                         >
                           {item}
                         </a>
@@ -703,8 +706,22 @@ const HomePage: React.FC = () => {
                     Contact
                   </h3>
                   <ul className={`space-y-3 ${themeClasses.textSecondary}`}>
-                    <li>support@smartpark.com</li>
-                    <li>+91 98765 43210</li>
+                    <li>
+  <a
+    href="mailto:support@smartpark.com"
+    className="hover:text-[#FF2F6C] transition-colors"
+  >
+    support@smartpark.com
+  </a>
+</li>
+                    <li>
+  <a
+    href="tel:+919876543210"
+    className="hover:text-[#FF2F6C] transition-colors"
+  >
+    +91 98765 43210
+  </a>
+</li>
                     <li>24/7 Support Available</li>
                   </ul>
                 </div>
