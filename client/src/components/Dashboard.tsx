@@ -81,12 +81,47 @@ const DashboardPage: React.FC = () => {
   const [timeframe, setTimeframe] = useState<"week" | "month" | "year">(
     "month",
   );
+  const [favorites, setFavorites] = useState<any[]>([]);
   const { token } = useAuth();
 
   const API = import.meta.env.VITE_API_URL;
 
   // Detect system theme
   const { theme } = useTheme();
+
+  // Fetch favorites from API
+  const fetchFavorites = async () => {
+    try {
+      const res = await fetch(`${API}/api/favorites`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) setFavorites(data.data);
+    } catch (err) {
+      console.error("Failed to fetch favorites");
+    }
+  };
+
+  // Handle clicking the heart icon to remove from dashboard
+  const handleToggleFavorite = async (locationId: string) => {
+    try {
+      const res = await fetch(`${API}/api/favorites/${locationId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // Immediately remove from the UI state
+        setFavorites((prev) => prev.filter((fav) => fav._id !== locationId));
+      }
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+    }
+  };
 
   useEffect(() => {
     if (!token) {
@@ -97,6 +132,7 @@ const DashboardPage: React.FC = () => {
 
     setIsAuthenticated(true);
     fetchDashboardData();
+    fetchFavorites(); // Fetch favorites alongside stats
   }, [timeframe, token]);
 
   const fetchDashboardData = async () => {
@@ -136,42 +172,42 @@ const DashboardPage: React.FC = () => {
 
   // Theme-based classes
   const getThemeClasses = () => {
-    return theme === 'light' 
+    return theme === "light"
       ? {
-          bg: 'bg-gray-50',
-          text: 'text-gray-900',
-          textSecondary: 'text-gray-600',
-          textMuted: 'text-gray-500',
-          border: 'border-gray-200',
-          cardBg: 'bg-white',
-          cardBgSecondary: 'bg-gray-50',
-          cardBorder: 'border-gray-200',
-          overlay: 'bg-black/5',
-          chartGrid: 'rgba(0, 0, 0, 0.1)',
-          chartText: '#4B5563',
+          bg: "bg-gray-50",
+          text: "text-gray-900",
+          textSecondary: "text-gray-600",
+          textMuted: "text-gray-500",
+          border: "border-gray-200",
+          cardBg: "bg-white",
+          cardBgSecondary: "bg-gray-50",
+          cardBorder: "border-gray-200",
+          overlay: "bg-black/5",
+          chartGrid: "rgba(0, 0, 0, 0.1)",
+          chartText: "#4B5563",
           gradient: {
-            primary: 'from-blue-600 to-blue-500',
-            secondary: 'from-pink-600 to-pink-500',
-            accent: 'from-blue-600 to-pink-600'
-          }
+            primary: "from-blue-600 to-blue-500",
+            secondary: "from-pink-600 to-pink-500",
+            accent: "from-blue-600 to-pink-600",
+          },
         }
       : {
-          bg: 'bg-[#191919]',
-          text: 'text-[#EEECF6]',
-          textSecondary: 'text-[#EEECF6]/70',
-          textMuted: 'text-[#EEECF6]/40',
-          border: 'border-[#1B42CB]/20',
-          cardBg: 'bg-[#191919]/60',
-          cardBgSecondary: 'bg-[#191919]/80',
-          cardBorder: 'border-[#1B42CB]/20',
-          overlay: 'bg-black/40',
-          chartGrid: 'rgba(238, 236, 246, 0.1)',
-          chartText: '#EEECF6',
+          bg: "bg-[#191919]",
+          text: "text-[#EEECF6]",
+          textSecondary: "text-[#EEECF6]/70",
+          textMuted: "text-[#EEECF6]/40",
+          border: "border-[#1B42CB]/20",
+          cardBg: "bg-[#191919]/60",
+          cardBgSecondary: "bg-[#191919]/80",
+          cardBorder: "border-[#1B42CB]/20",
+          overlay: "bg-black/40",
+          chartGrid: "rgba(238, 236, 246, 0.1)",
+          chartText: "#EEECF6",
           gradient: {
-            primary: 'from-[#1B42CB] to-[#1B42CB]/80',
-            secondary: 'from-[#FF2F6C] to-[#FF2F6C]/80',
-            accent: 'from-[#1B42CB] to-[#FF2F6C]'
-          }
+            primary: "from-[#1B42CB] to-[#1B42CB]/80",
+            secondary: "from-[#FF2F6C] to-[#FF2F6C]/80",
+            accent: "from-[#1B42CB] to-[#FF2F6C]",
+          },
         };
   };
 
@@ -285,18 +321,26 @@ const DashboardPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4 transition-colors duration-300`}>
+      <div
+        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4 transition-colors duration-300`}
+      >
         <div className="text-center">
           <div className="relative">
-            <div className={`w-24 h-24 rounded-full bg-gradient-to-r ${themeClasses.gradient.accent} animate-spin`}></div>
+            <div
+              className={`w-24 h-24 rounded-full bg-gradient-to-r ${themeClasses.gradient.accent} animate-spin`}
+            ></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`w-20 h-20 rounded-full ${theme === 'light' ? 'bg-white' : 'bg-[#191919]'}`}></div>
+              <div
+                className={`w-20 h-20 rounded-full ${theme === "light" ? "bg-white" : "bg-[#191919]"}`}
+              ></div>
             </div>
           </div>
           <p className={`mt-6 ${themeClasses.text} text-lg font-semibold`}>
             Loading your dashboard...
           </p>
-          <p className={themeClasses.textSecondary}>Analyzing your parking data</p>
+          <p className={themeClasses.textSecondary}>
+            Analyzing your parking data
+          </p>
         </div>
       </div>
     );
@@ -321,19 +365,20 @@ const DashboardPage: React.FC = () => {
           </h2>
 
           <p className={`${themeClasses.textSecondary} mb-8`}>
-            You are not signed in. Please sign in or create an account to access the dashboard.
+            You are not signed in. Please sign in or create an account to access
+            the dashboard.
           </p>
 
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => window.location.href = "/login"}
+              onClick={() => (window.location.href = "/login")}
               className="px-6 py-3 bg-gradient-to-r from-[#1B42CB] to-[#1B42CB]/80 text-white rounded-xl font-semibold hover:opacity-90 transition-all"
             >
               Sign In
             </button>
 
             <button
-              onClick={() => window.location.href = "/signup"}
+              onClick={() => (window.location.href = "/signup")}
               className={`px-6 py-3 border ${themeClasses.border}
               rounded-xl font-semibold ${themeClasses.text}`}
             >
@@ -347,10 +392,16 @@ const DashboardPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4 transition-colors duration-300`}>
-        <div className={`backdrop-blur-xl ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-3xl p-8 max-w-md w-full shadow-2xl`}>
+      <div
+        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4 transition-colors duration-300`}
+      >
+        <div
+          className={`backdrop-blur-xl ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-3xl p-8 max-w-md w-full shadow-2xl`}
+        >
           <div className="text-center">
-            <div className={`w-20 h-20 bg-gradient-to-br from-[#FF2F6C]/20 to-[#1B42CB]/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#FF2F6C]/30`}>
+            <div
+              className={`w-20 h-20 bg-gradient-to-br from-[#FF2F6C]/20 to-[#1B42CB]/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#FF2F6C]/30`}
+            >
               <Icons.AlertTriangle className="w-8 h-8 text-[#FF2F6C]" />
             </div>
             <h2 className={`text-2xl font-bold ${themeClasses.text} mb-3`}>
@@ -370,7 +421,9 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${themeClasses.bg} p-4 md:p-6 transition-colors duration-300`}>
+    <div
+      className={`min-h-screen ${themeClasses.bg} p-4 md:p-6 transition-colors duration-300`}
+    >
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#1B42CB]/10 rounded-full blur-3xl"></div>
@@ -380,15 +433,21 @@ const DashboardPage: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
         <header className="mb-8">
-          <div className={`backdrop-blur-xl ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-2xl p-6 md:p-8 shadow-2xl`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-2xl p-6 md:p-8 shadow-2xl`}
+          >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
                 <div className="flex items-center gap-4 mb-3">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}
+                  >
                     <Icons.BarChart3 className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-[${theme === 'light' ? '#1B42CB' : '#EEECF6'}] to-[#1B42CB] bg-clip-text text-transparent`}>
+                    <h1
+                      className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-[${theme === "light" ? "#1B42CB" : "#EEECF6"}] to-[#1B42CB] bg-clip-text text-transparent`}
+                    >
                       Analytics Dashboard
                     </h1>
                     <p className={themeClasses.textSecondary}>
@@ -399,7 +458,9 @@ const DashboardPage: React.FC = () => {
               </div>
 
               {/* Time Filter */}
-              <div className={`flex gap-2 ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-xl p-1`}>
+              <div
+                className={`flex gap-2 ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-xl p-1`}
+              >
                 {["week", "month", "year"].map((period) => (
                   <button
                     key={period}
@@ -410,9 +471,15 @@ const DashboardPage: React.FC = () => {
                         : `${themeClasses.textSecondary} hover:${themeClasses.text} hover:bg-white/5`
                     }`}
                   >
-                    {period === 'week' && <Icons.CalendarDays className="w-4 h-4" />}
-                    {period === 'month' && <Icons.Calendar className="w-4 h-4" />}
-                    {period === 'year' && <Icons.CalendarRange className="w-4 h-4" />}
+                    {period === "week" && (
+                      <Icons.CalendarDays className="w-4 h-4" />
+                    )}
+                    {period === "month" && (
+                      <Icons.Calendar className="w-4 h-4" />
+                    )}
+                    {period === "year" && (
+                      <Icons.CalendarRange className="w-4 h-4" />
+                    )}
                     {period.charAt(0).toUpperCase() + period.slice(1)}
                   </button>
                 ))}
@@ -423,7 +490,9 @@ const DashboardPage: React.FC = () => {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-[#1B42CB]/20 flex items-center justify-center">
                 <Icons.CalendarCheck className="w-6 h-6 text-[#1B42CB]" />
@@ -435,7 +504,9 @@ const DashboardPage: React.FC = () => {
             <h3 className={themeClasses.textSecondary}>Total Bookings</h3>
           </div>
 
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
                 <Icons.CheckCircle className="w-6 h-6 text-green-500" />
@@ -447,7 +518,9 @@ const DashboardPage: React.FC = () => {
             <h3 className={themeClasses.textSecondary}>Completed</h3>
           </div>
 
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-[#FF2F6C]/20 flex items-center justify-center">
                 <Icons.IndianRupee className="w-6 h-6 text-[#FF2F6C]" />
@@ -459,7 +532,9 @@ const DashboardPage: React.FC = () => {
             <h3 className={themeClasses.textSecondary}>Total Spent</h3>
           </div>
 
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:shadow-[#1B42CB]/10 transition-all duration-300`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
                 <Icons.Clock className="w-6 h-6 text-purple-500" />
@@ -475,7 +550,9 @@ const DashboardPage: React.FC = () => {
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Booking Status Distribution */}
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}
+          >
             <h3 className={`text-xl font-bold ${themeClasses.text} mb-6`}>
               Booking Status Distribution
             </h3>
@@ -485,13 +562,17 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* Favorite Parking */}
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}
+          >
             <h3 className={`text-xl font-bold ${themeClasses.text} mb-6`}>
               Favorite Parking Location
             </h3>
             {stats?.favoriteParking ? (
               <div className="text-center">
-                <div className={`w-24 h-24 mx-auto mb-4 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}>
+                <div
+                  className={`w-24 h-24 mx-auto mb-4 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}
+                >
                   <Icons.Trophy className="w-8 h-8 text-white" />
                 </div>
                 <h4 className={`text-2xl font-bold ${themeClasses.text} mb-2`}>
@@ -509,7 +590,9 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* Booking Trends */}
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl lg:col-span-2`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl lg:col-span-2`}
+          >
             <h3 className={`text-xl font-bold ${themeClasses.text} mb-6`}>
               Booking & Spending Trends
             </h3>
@@ -519,7 +602,9 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* Hourly Distribution */}
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}
+          >
             <h3 className={`text-xl font-bold ${themeClasses.text} mb-6`}>
               Peak Booking Hours
             </h3>
@@ -529,7 +614,9 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* Duration Analysis */}
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}
+          >
             <h3 className={`text-xl font-bold ${themeClasses.text} mb-6`}>
               Parking Duration Analysis
             </h3>
@@ -541,7 +628,9 @@ const DashboardPage: React.FC = () => {
 
         {/* Additional Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className={`backdrop-blur-xl bg-gradient-to-br from-[#1B42CB]/10 to-transparent border ${themeClasses.border} rounded-2xl p-6`}>
+          <div
+            className={`backdrop-blur-xl bg-gradient-to-br from-[#1B42CB]/10 to-transparent border ${themeClasses.border} rounded-2xl p-6`}
+          >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 rounded-lg bg-[#1B42CB]/20 flex items-center justify-center">
                 <Icons.TrendingUp className="w-5 h-5 text-[#1B42CB]" />
@@ -553,12 +642,12 @@ const DashboardPage: React.FC = () => {
             <p className={`text-3xl font-bold ${themeClasses.text}`}>
               ₹{stats?.averageSpentPerBooking || 0}
             </p>
-            <p className={themeClasses.textMuted}>
-              Per booking average
-            </p>
+            <p className={themeClasses.textMuted}>Per booking average</p>
           </div>
 
-          <div className={`backdrop-blur-xl bg-gradient-to-br from-[#FF2F6C]/10 to-transparent border ${themeClasses.border} rounded-2xl p-6`}>
+          <div
+            className={`backdrop-blur-xl bg-gradient-to-br from-[#FF2F6C]/10 to-transparent border ${themeClasses.border} rounded-2xl p-6`}
+          >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 rounded-lg bg-[#FF2F6C]/20 flex items-center justify-center">
                 <Icons.Activity className="w-5 h-5 text-[#FF2F6C]" />
@@ -573,7 +662,9 @@ const DashboardPage: React.FC = () => {
             <p className={themeClasses.textMuted}>Currently active</p>
           </div>
 
-          <div className={`backdrop-blur-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-2xl p-6`}>
+          <div
+            className={`backdrop-blur-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-2xl p-6`}
+          >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
                 <Icons.Percent className="w-5 h-5 text-green-500" />
@@ -592,6 +683,86 @@ const DashboardPage: React.FC = () => {
             </p>
             <p className={themeClasses.textMuted}>Of total bookings</p>
           </div>
+        </div>
+
+        {/* My Saved Locations Section */}
+        <div className="mt-8 mb-8">
+          <h2
+            className={`text-2xl font-bold ${themeClasses.text} mb-6 flex items-center gap-2`}
+          >
+            <Icons.Heart className="w-6 h-6 text-[#FF2F6C] fill-current" />
+            My Saved Locations
+          </h2>
+
+          {favorites.length === 0 ? (
+            <div
+              className={`backdrop-blur-xl ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-2xl p-8 text-center shadow-xl`}
+            >
+              <Icons.MapPin
+                className={`w-12 h-12 mx-auto mb-3 ${themeClasses.textMuted}`}
+              />
+              <p className={themeClasses.textSecondary}>
+                You haven't saved any favorite parking spots yet.
+              </p>
+              <button
+                onClick={() => (window.location.href = "/")} // Adjust to your search/map route
+                className="mt-4 px-6 py-2 bg-[#1B42CB] text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Find Parking
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {favorites.map((location) => (
+                <div
+                  key={location._id}
+                  className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all`}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className={`text-lg font-bold ${themeClasses.text}`}>
+                        {location.name || "Parking Location"}
+                      </h3>
+                      <p
+                        className={`${themeClasses.textSecondary} text-sm mt-1`}
+                      >
+                        {location.address || "Location Address"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleFavorite(location._id)}
+                      className="text-[#FF2F6C] hover:scale-110 transition-transform focus:outline-none"
+                      aria-label="Remove from favorites"
+                    >
+                      <Icons.Heart className="w-6 h-6 fill-current" />
+                    </button>
+                  </div>
+
+                  <div className="flex gap-2 mb-4">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-md ${themeClasses.cardBgSecondary} ${themeClasses.textSecondary}`}
+                    >
+                      ₹{location.price}/hr
+                    </span>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-md ${themeClasses.cardBgSecondary} ${themeClasses.textSecondary}`}
+                    >
+                      {location.totalSlots} Slots
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      (window.location.href = `/parking/${location._id}`)
+                    } // Adjust to your booking route
+                    className={`w-full py-2 bg-gradient-to-r ${themeClasses.gradient.primary} text-white rounded-lg font-medium hover:opacity-90 transition-opacity`}
+                  >
+                    Book Now
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
