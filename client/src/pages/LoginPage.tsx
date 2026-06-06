@@ -2,15 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Car,
-  AlertCircle,
-  LogIn,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Car, AlertCircle, LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -22,10 +14,8 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-   // Detect system theme
-    const { theme } = useTheme();
-  
-  
+  // Detect system theme
+  const { theme } = useTheme();
 
   // Theme-based classes
   const getThemeClasses = () => {
@@ -112,16 +102,13 @@ export default function LoginPage() {
     setMsg("");
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
+      const res = await fetch(`/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
 

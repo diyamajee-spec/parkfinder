@@ -6,16 +6,14 @@ import { useTheme } from "../context/ThemeContext";
 
 const HomePage: React.FC = () => {
   const [isStarred, setIsStarred] = useState(false);
-const [favoriteMessage, setFavoriteMessage] = useState("");
+  const [favoriteMessage, setFavoriteMessage] = useState("");
   const [activeSection, setActiveSection] = useState(0);
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
- // Detect system theme
+  // Detect system theme
   const { theme } = useTheme();
-
 
   interface ParkingSlot {
     [key: string]: unknown;
@@ -39,11 +37,9 @@ const [favoriteMessage, setFavoriteMessage] = useState("");
     { lat: 28.6095, lng: 77.204 }, // Slot 10
   ];
 
-  const API = import.meta.env.VITE_API_URL;
-
   const fetchParkingSlots = async () => {
     try {
-      const response = await fetch(`${API}/api/parking`);
+      const response = await fetch(`/api/parking`);
       const result = await response.json();
 
       if (result.success) {
@@ -169,14 +165,16 @@ const [favoriteMessage, setFavoriteMessage] = useState("");
       </div>
 
       {/* Navigation Dots */}
-<div className="fixed right-[2px] sm:right-3 lg:right-6 top-1/2 transform -translate-y-1/2 z-40 flex flex-col gap-1.5 sm:gap-2">         {[0, 1, 2].map((index) => (
+      <div className="fixed right-[2px] sm:right-3 lg:right-6 top-1/2 transform -translate-y-1/2 z-40 flex flex-col gap-1.5 sm:gap-2">
+        {" "}
+        {[0, 1, 2].map((index) => (
           <button
             key={index}
             onClick={() => scrollToSection(index)}
             className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
               activeSection === index
                 ? `bg-linear-to-r ${themeClasses.linear.accent} scale-125`
-                : 'bg-gray-400/40 hover:bg-gray-400/60'
+                : "bg-gray-400/40 hover:bg-gray-400/60"
             }`}
             aria-label={`Go to section ${index + 1}`}
           />
@@ -296,34 +294,33 @@ const [favoriteMessage, setFavoriteMessage] = useState("");
                         </div>
                       </div>
                       <button
-                         onClick={() => {
-                              if (!isStarred) {
-                                setFavoriteMessage("Saved to favorites !");
-                              } else {
-                                setFavoriteMessage("Removed from favorites");
-                              }
+                        onClick={() => {
+                          if (!isStarred) {
+                            setFavoriteMessage("Saved to favorites !");
+                          } else {
+                            setFavoriteMessage("Removed from favorites");
+                          }
 
-                              setIsStarred(!isStarred);
+                          setIsStarred(!isStarred);
 
-                              setTimeout(() => {
-                                setFavoriteMessage("");
-                              }, 2000);
-                            }}
-                          className={`relative p-3 hover:${themeClasses.overlay} rounded-xl transition-colors`}
+                          setTimeout(() => {
+                            setFavoriteMessage("");
+                          }, 2000);
+                        }}
+                        className={`relative p-3 hover:${themeClasses.overlay} rounded-xl transition-colors`}
                       >
-
-                      {favoriteMessage && (
-                            <div className="absolute -top-1 right-0 text-[10px] text-yellow-500 whitespace-nowrap">
-                              {favoriteMessage}
-                            </div>
-                          )}
+                        {favoriteMessage && (
+                          <div className="absolute -top-1 right-0 text-[10px] text-yellow-500 whitespace-nowrap">
+                            {favoriteMessage}
+                          </div>
+                        )}
 
                         <Icons.Star
-                           className={`w-5 h-5 ${
-                           isStarred
-                            ? "text-yellow-400 fill-yellow-400"
+                          className={`w-5 h-5 ${
+                            isStarred
+                              ? "text-yellow-400 fill-yellow-400"
                               : themeClasses.textSecondary
-                             }`}
+                          }`}
                         />
                       </button>
                     </div>
@@ -677,29 +674,29 @@ const [favoriteMessage, setFavoriteMessage] = useState("");
                 </p>
                 <div className="flex gap-4">
                   <a
-  href="tel:+919876543210"
-  className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
->
-  <Icons.Smartphone
-    className={`w-5 h-5 ${themeClasses.textSecondary}`}
-  />
-</a>
+                    href="tel:+919876543210"
+                    className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
+                  >
+                    <Icons.Smartphone
+                      className={`w-5 h-5 ${themeClasses.textSecondary}`}
+                    />
+                  </a>
                   <a
-  href="mailto:support@smartpark.com"
-  className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
->
-  <Icons.Mail
-    className={`w-5 h-5 ${themeClasses.textSecondary}`}
-  />
-</a>
+                    href="mailto:support@smartpark.com"
+                    className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 transition-colors`}
+                  >
+                    <Icons.Mail
+                      className={`w-5 h-5 ${themeClasses.textSecondary}`}
+                    />
+                  </a>
                   <a
-  href="sms:+919876543210"
-  className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 hover:scale-110 transition-all duration-200`}
->
-  <Icons.MessageCircle
-    className={`w-5 h-5 ${themeClasses.textSecondary}`}
-  />
-</a>
+                    href="sms:+919876543210"
+                    className={`w-10 h-10 rounded-lg bg-black/5 border ${themeClasses.border} flex items-center justify-center hover:border-[#FF2F6C]/30 hover:scale-110 transition-all duration-200`}
+                  >
+                    <Icons.MessageCircle
+                      className={`w-5 h-5 ${themeClasses.textSecondary}`}
+                    />
+                  </a>
                 </div>
               </div>
 
@@ -732,21 +729,21 @@ const [favoriteMessage, setFavoriteMessage] = useState("");
                   </h3>
                   <ul className={`space-y-3 ${themeClasses.textSecondary}`}>
                     <li>
-  <a
-    href="mailto:support@smartpark.com"
-    className="hover:text-[#FF2F6C] transition-colors"
-  >
-    support@smartpark.com
-  </a>
-</li>
+                      <a
+                        href="mailto:support@smartpark.com"
+                        className="hover:text-[#FF2F6C] transition-colors"
+                      >
+                        support@smartpark.com
+                      </a>
+                    </li>
                     <li>
-  <a
-    href="tel:+919876543210"
-    className="hover:text-[#FF2F6C] transition-colors"
-  >
-    +91 98765 43210
-  </a>
-</li>
+                      <a
+                        href="tel:+919876543210"
+                        className="hover:text-[#FF2F6C] transition-colors"
+                      >
+                        +91 98765 43210
+                      </a>
+                    </li>
                     <li>24/7 Support Available</li>
                   </ul>
                 </div>

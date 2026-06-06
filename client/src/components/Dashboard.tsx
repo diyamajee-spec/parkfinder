@@ -84,42 +84,93 @@ const DashboardPage: React.FC = () => {
   const [favorites, setFavorites] = useState<any[]>([]);
   const { token } = useAuth();
 
-  const API = import.meta.env.VITE_API_URL;
-
   // Detect system theme
   const { theme } = useTheme();
 
   // Fetch favorites from API
   const fetchFavorites = async () => {
     try {
-      const res = await fetch(`${API}/api/favorites`, {
+      const res = await fetch(`/api/favorites`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      // Handle 304 Not Modified - keep existing data
+      if (res.status === 304) {
+        console.log("Favorites data is cached (304 Not Modified)");
+        return;
+      }
+
+      // Check if response is successful
+      if (!res.ok) {
+        console.error(
+          `Failed to fetch favorites: ${res.status} ${res.statusText}`,
+        );
+        return;
+      }
+
+      // Check Content-Type before parsing JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const bodyText = await res.text();
+        console.error(
+          `Invalid Content-Type: ${contentType}. Response body:`,
+          bodyText,
+        );
+        return;
+      }
+
+      // Parse JSON response
       const data = await res.json();
-      if (data.success) setFavorites(data.data);
+      if (data.success) {
+        setFavorites(data.data);
+      } else {
+        console.warn("Favorites API returned success: false", data.message);
+      }
     } catch (err) {
-      console.error("Failed to fetch favorites");
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      console.error("Error fetching favorites:", errorMsg);
     }
   };
 
   // Handle clicking the heart icon to remove from dashboard
   const handleToggleFavorite = async (locationId: string) => {
     try {
-      const res = await fetch(`${API}/api/favorites/${locationId}`, {
+      const res = await fetch(`/api/favorites/${locationId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+
+      if (!res.ok) {
+        const bodyText = await res.text();
+        console.error(
+          `Failed to toggle favorite: ${res.status}. Response: ${bodyText.slice(0, 200)}`,
+        );
+        return;
+      }
+
+      // Check Content-Type before parsing JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error(
+          `Invalid Content-Type for favorite toggle: ${contentType}`,
+        );
+        return;
+      }
+
       const data = await res.json();
 
       if (data.success) {
         // Immediately remove from the UI state
         setFavorites((prev) => prev.filter((fav) => fav._id !== locationId));
+      } else {
+        console.warn("Toggle favorite returned success: false", data.message);
       }
     } catch (err) {
-      console.error("Error toggling favorite:", err);
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      console.error("Error toggling favorite:", errorMsg);
     }
   };
 
@@ -139,7 +190,7 @@ const DashboardPage: React.FC = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `${API}/api/dashboard/user-stats?timeframe=${timeframe}`,
+        `/api/dashboard/user-stats?timeframe=${timeframe}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -147,6 +198,35 @@ const DashboardPage: React.FC = () => {
         },
       );
 
+      // Handle 304 Not Modified - keep existing data
+      if (res.status === 304) {
+        console.log("Dashboard data is cached (304 Not Modified)");
+        setLoading(false);
+        return;
+      }
+
+      // Check if response is successful
+      if (!res.ok) {
+        const bodyText = await res.text();
+        const statusError = `Server error: ${res.status} ${res.statusText}. Response: ${bodyText.slice(0, 200)}`;
+        setError(`Server error: ${res.status} ${res.statusText}`);
+        console.error(statusError);
+        setLoading(false);
+        return;
+      }
+
+      // Check Content-Type before parsing JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const bodyText = await res.text();
+        const errorMsg = `Invalid Content-Type: ${contentType}. Expected application/json. Response: ${bodyText.slice(0, 200)}`;
+        setError("Server returned invalid response format");
+        console.error(errorMsg);
+        setLoading(false);
+        return;
+      }
+
+      // Parse JSON response
       const data = await res.json();
 
       if (data.success) {
@@ -158,13 +238,14 @@ const DashboardPage: React.FC = () => {
         ) {
           setError("Your session has expired. Please sign in again.");
         } else {
-          setError(data.message);
+          setError(data.message || "Failed to fetch dashboard data");
         }
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch dashboard data",
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch dashboard data";
+      setError("Failed to load dashboard. Please check your connection.");
+      console.error("Dashboard fetch error:", errorMessage);
     } finally {
       setLoading(false);
     }

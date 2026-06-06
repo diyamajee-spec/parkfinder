@@ -90,14 +90,10 @@ export default function AdminPanel() {
     name: string;
   } | null>(null);
 
- 
   const { token } = useAuth();
-  const API = import.meta.env.VITE_API_URL;
 
- // Detect system theme
+  // Detect system theme
   const { theme } = useTheme();
-
-
 
   // Theme-based classes
   const themeClasses = {
@@ -171,7 +167,7 @@ export default function AdminPanel() {
   const fetchParkingSlots = async () => {
     try {
       setLoading((prev) => ({ ...prev, parking: true }));
-      const res = await fetch(`${API}/api/admin/slots`, {
+      const res = await fetch(`/api/admin/slots`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -197,7 +193,7 @@ export default function AdminPanel() {
   const fetchUsers = async () => {
     try {
       setLoading((prev) => ({ ...prev, users: true }));
-      const res = await fetch(`${API}/api/admin/users`, {
+      const res = await fetch(`/api/admin/users`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -237,7 +233,7 @@ export default function AdminPanel() {
         token?.substring(0, 20) + "...",
       );
 
-      const res = await fetch(`${API}/api/bookings/all`, {
+      const res = await fetch(`/api/bookings/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -272,7 +268,7 @@ export default function AdminPanel() {
   // Handle Slot Operations
   const handleDeleteSlot = async (id: string) => {
     try {
-      await fetch(`${API}/api/admin/slots/${id}`, {
+      await fetch(`/api/admin/slots/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -319,8 +315,8 @@ export default function AdminPanel() {
     try {
       const method = editingSlotId ? "PUT" : "POST";
       const url = editingSlotId
-        ? `${API}/api/admin/slots/${editingSlotId}`
-        : `${API}/api/admin/slots`;
+        ? `/api/admin/slots/${editingSlotId}`
+        : `/api/admin/slots`;
 
       const res = await fetch(url, {
         method,
@@ -354,7 +350,7 @@ export default function AdminPanel() {
   // Handle User Operations
   const handleDeleteUser = async (id: string) => {
     try {
-      await fetch(`${API}/api/admin/users/${id}`, {
+      await fetch(`/api/admin/users/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -368,7 +364,7 @@ export default function AdminPanel() {
 
   const handleRoleChange = async (id: string, role: string) => {
     try {
-      await fetch(`${API}/api/admin/users/${id}`, {
+      await fetch(`/api/admin/users/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -386,7 +382,7 @@ export default function AdminPanel() {
   // Handle Booking Operations
   const handleUpdateBookingStatus = async (id: string, status: string) => {
     try {
-      const res = await fetch(`${API}/api/bookings/${id}/status`, {
+      const res = await fetch(`/api/bookings/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -411,7 +407,7 @@ export default function AdminPanel() {
     try {
       console.log("📌 Deleting booking:", id);
 
-      const res = await fetch(`${API}/api/bookings/admin-delete/${id}`, {
+      const res = await fetch(`/api/bookings/admin-delete/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

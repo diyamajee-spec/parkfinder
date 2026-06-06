@@ -66,7 +66,6 @@ const ParkingSlotPage: React.FC = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const { token, user } = useAuth();
-  const API = import.meta.env.VITE_API_URL;
 
   // Detect system theme
   const { theme } = useTheme();
@@ -128,7 +127,7 @@ const ParkingSlotPage: React.FC = () => {
   // Function to fetch parking slots
   const fetchParkingSlots = async () => {
     try {
-      const response = await fetch(`${API}/api/parking`);
+      const response = await fetch(`/api/parking`);
       const result: ApiResponse = await response.json();
       if (result.success) {
         const slotsWithCoordinates = result.data.map((slot, index) => ({
@@ -156,7 +155,7 @@ const ParkingSlotPage: React.FC = () => {
   const fetchFavorites = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${API}/api/favorites`, {
+      const res = await fetch(`/api/favorites`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -220,7 +219,7 @@ const ParkingSlotPage: React.FC = () => {
           : [...prev, locationId],
       );
 
-      const res = await fetch(`${API}/api/favorites/${locationId}`, {
+      const res = await fetch(`/api/favorites/${locationId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -289,7 +288,7 @@ const ParkingSlotPage: React.FC = () => {
     try {
       const totalPrice = selectedSlot.pricePerHour * duration;
 
-      const res = await fetch(`${API}/api/bookings/book`, {
+      const res = await fetch(`/api/bookings/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -655,7 +654,9 @@ const ParkingSlotPage: React.FC = () => {
               <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Icons.AlertTriangle className="w-5 h-5 text-red-500" />
-                  <span className={`font-semibold ${themeClasses.text}`}>Emergency Assistance</span>
+                  <span className={`font-semibold ${themeClasses.text}`}>
+                    Emergency Assistance
+                  </span>
                 </div>
                 <div className="flex gap-3">
                   <a
@@ -879,7 +880,11 @@ const ParkingSlotPage: React.FC = () => {
                   <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                     <div className="flex items-center gap-2 mb-3">
                       <Icons.AlertTriangle className="w-4 h-4 text-red-500" />
-                      <span className={`text-sm font-semibold ${themeClasses.text}`}>Emergency Assistance</span>
+                      <span
+                        className={`text-sm font-semibold ${themeClasses.text}`}
+                      >
+                        Emergency Assistance
+                      </span>
                     </div>
                     <div className="flex gap-2">
                       <a
@@ -1482,4 +1487,4 @@ const ParkingSlotPage: React.FC = () => {
   );
 };
 
-export default ParkingSlotPage; 
+export default ParkingSlotPage;

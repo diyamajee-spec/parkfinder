@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import {
@@ -43,9 +43,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
 
   // Detect system theme
-   const { theme } = useTheme();
- 
- 
+  const { theme } = useTheme();
 
   // Theme-based classes
   const getThemeClasses = () => {
@@ -244,23 +242,20 @@ export default function SignupPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: form.name.trim(),
-            email: form.email.trim(),
-            password: form.password,
-            role: form.role,
-            adminSecret: form.role === "admin" ? form.adminSecret : undefined,
-          }),
+      const res = await fetch(`/api/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          role: form.role,
+          adminSecret: form.role === "admin" ? form.adminSecret : undefined,
+        }),
+      });
 
       const data = await res.json();
 

@@ -36,23 +36,19 @@ const BookedSlotsPage: React.FC = () => {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
- // Detect system theme
+
+  // Detect system theme
   const { theme } = useTheme();
   const { token, user } = useAuth();
   const receiptRef = useRef<HTMLDivElement>(null);
-  const API = import.meta.env.VITE_API_URL;
 
   const fetchBookedSlots = async () => {
     try {
-      const res = await fetch(
-        `${API}/api/bookings/my-bookings`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const res = await fetch(`/api/bookings/my-bookings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const data = await res.json();
 
@@ -90,15 +86,12 @@ const BookedSlotsPage: React.FC = () => {
     if (!confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
-      const res = await fetch(
-        `${API}/api/bookings/cancel/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const res = await fetch(`/api/bookings/cancel/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const data = await res.json();
 
@@ -122,7 +115,7 @@ const BookedSlotsPage: React.FC = () => {
 
   const handleVehicleEntry = async (bookingId: string) => {
     try {
-      const res = await fetch(`${API}/api/enter/${bookingId}`, {
+      const res = await fetch(`/api/enter/${bookingId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -148,7 +141,7 @@ const BookedSlotsPage: React.FC = () => {
     if (!confirm("Are you sure you want to mark vehicle exit?")) return;
 
     try {
-      const res = await fetch(`${API}/api/exit/${bookingId}`, {
+      const res = await fetch(`/api/exit/${bookingId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -278,34 +271,34 @@ const BookedSlotsPage: React.FC = () => {
 
   // Theme-based classes
   const getThemeClasses = () => {
-    return theme === 'light' 
+    return theme === "light"
       ? {
-          bg: 'bg-gray-50',
-          text: 'text-gray-900',
-          textSecondary: 'text-gray-600',
-          border: 'border-gray-200',
-          cardBg: 'bg-white',
-          cardBorder: 'border-gray-200',
-          overlay: 'bg-black/5',
+          bg: "bg-gray-50",
+          text: "text-gray-900",
+          textSecondary: "text-gray-600",
+          border: "border-gray-200",
+          cardBg: "bg-white",
+          cardBorder: "border-gray-200",
+          overlay: "bg-black/5",
           gradient: {
-            primary: 'from-blue-600 to-blue-500',
-            secondary: 'from-pink-600 to-pink-500',
-            accent: 'from-blue-600 to-pink-600'
-          }
+            primary: "from-blue-600 to-blue-500",
+            secondary: "from-pink-600 to-pink-500",
+            accent: "from-blue-600 to-pink-600",
+          },
         }
       : {
-          bg: 'bg-[#191919]',
-          text: 'text-[#EEECF6]',
-          textSecondary: 'text-[#EEECF6]/70',
-          border: 'border-[#1B42CB]/20',
-          cardBg: 'bg-[#191919]/40',
-          cardBorder: 'border-[#1B42CB]/20',
-          overlay: 'bg-black/40',
+          bg: "bg-[#191919]",
+          text: "text-[#EEECF6]",
+          textSecondary: "text-[#EEECF6]/70",
+          border: "border-[#1B42CB]/20",
+          cardBg: "bg-[#191919]/40",
+          cardBorder: "border-[#1B42CB]/20",
+          overlay: "bg-black/40",
           gradient: {
-            primary: 'from-[#1B42CB] to-[#1B42CB]/80',
-            secondary: 'from-[#FF2F6C] to-[#FF2F6C]/80',
-            accent: 'from-[#1B42CB] to-[#FF2F6C]'
-          }
+            primary: "from-[#1B42CB] to-[#1B42CB]/80",
+            secondary: "from-[#FF2F6C] to-[#FF2F6C]/80",
+            accent: "from-[#1B42CB] to-[#FF2F6C]",
+          },
         };
   };
 
@@ -390,12 +383,18 @@ const BookedSlotsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4`}>
+      <div
+        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4`}
+      >
         <div className="text-center">
           <div className="relative">
-            <div className={`w-24 h-24 rounded-full bg-gradient-to-r ${themeClasses.gradient.accent} animate-spin`}></div>
+            <div
+              className={`w-24 h-24 rounded-full bg-gradient-to-r ${themeClasses.gradient.accent} animate-spin`}
+            ></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`w-20 h-20 rounded-full ${themeClasses.bg}`}></div>
+              <div
+                className={`w-20 h-20 rounded-full ${themeClasses.bg}`}
+              ></div>
             </div>
           </div>
           <p className={`mt-6 ${themeClasses.text} text-lg font-semibold`}>
@@ -426,7 +425,8 @@ const BookedSlotsPage: React.FC = () => {
           </h2>
 
           <p className={`${themeClasses.textSecondary} mb-8`}>
-            You are not signed in. Please sign in or create an account to access your bookings.
+            You are not signed in. Please sign in or create an account to access
+            your bookings.
           </p>
 
           <div className="flex gap-3 justify-center">
@@ -453,8 +453,12 @@ const BookedSlotsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4`}>
-        <div className={`backdrop-blur-xl bg-[#1B42CB]/10 border ${themeClasses.border} rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-[#1B42CB]/10`}>
+      <div
+        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center p-4`}
+      >
+        <div
+          className={`backdrop-blur-xl bg-[#1B42CB]/10 border ${themeClasses.border} rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-[#1B42CB]/10`}
+        >
           <div className="text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-[#FF2F6C]/20 to-[#1B42CB]/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#FF2F6C]/30">
               <Icons.AlertCircle className="w-10 h-10 text-[#FF2F6C]" />
@@ -476,7 +480,9 @@ const BookedSlotsPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${themeClasses.bg} p-4 md:p-6 transition-colors duration-300`}>
+    <div
+      className={`min-h-screen ${themeClasses.bg} p-4 md:p-6 transition-colors duration-300`}
+    >
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#1B42CB]/10 rounded-full blur-3xl"></div>
@@ -487,11 +493,17 @@ const BookedSlotsPage: React.FC = () => {
       {showReceiptModal && selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="relative w-full max-w-4xl">
-            <div className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-2xl shadow-2xl overflow-hidden`}>
+            <div
+              className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-2xl shadow-2xl overflow-hidden`}
+            >
               {/* Modal Header */}
-              <div className={`px-6 py-4 bg-gradient-to-r from-[#1B42CB]/20 to-[#FF2F6C]/20 border-b ${themeClasses.border}`}>
+              <div
+                className={`px-6 py-4 bg-gradient-to-r from-[#1B42CB]/20 to-[#FF2F6C]/20 border-b ${themeClasses.border}`}
+              >
                 <div className="flex justify-between items-center">
-                  <h2 className={`text-2xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}>
+                  <h2
+                    className={`text-2xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}
+                  >
                     Booking Receipt
                   </h2>
                   <button
@@ -512,10 +524,14 @@ const BookedSlotsPage: React.FC = () => {
                   {/* Receipt Header */}
                   <div className="text-center mb-8">
                     <div className="inline-flex items-center gap-3 mb-4">
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}>
+                      <div
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}
+                      >
                         <Icons.Car className="w-7 h-7 text-white" />
                       </div>
-                      <h1 className={`text-3xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}>
+                      <h1
+                        className={`text-3xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}
+                      >
                         PARKING RECEIPT
                       </h1>
                     </div>
@@ -529,31 +545,45 @@ const BookedSlotsPage: React.FC = () => {
                     {/* Booking Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                       <div className="space-y-2">
-                        <div className={`text-sm ${themeClasses.textSecondary}`}>
+                        <div
+                          className={`text-sm ${themeClasses.textSecondary}`}
+                        >
                           Receipt Number
                         </div>
-                        <div className={`text-xl font-mono font-bold ${themeClasses.text}`}>
+                        <div
+                          className={`text-xl font-mono font-bold ${themeClasses.text}`}
+                        >
                           {selectedBooking._id}
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <div className={`text-sm ${themeClasses.textSecondary}`}>
+                        <div
+                          className={`text-sm ${themeClasses.textSecondary}`}
+                        >
                           Booking Date
                         </div>
-                        <div className={`text-lg font-semibold ${themeClasses.text}`}>
+                        <div
+                          className={`text-lg font-semibold ${themeClasses.text}`}
+                        >
                           {formatDateForReceipt(selectedBooking.bookingDate)}
                         </div>
                       </div>
                     </div>
 
                     {/* User Info */}
-                    <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4 mb-6`}>
-                      <h3 className={`text-lg font-bold ${themeClasses.text} mb-4`}>
+                    <div
+                      className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4 mb-6`}
+                    >
+                      <h3
+                        className={`text-lg font-bold ${themeClasses.text} mb-4`}
+                      >
                         Customer Information
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary} mb-1`}
+                          >
                             Name
                           </div>
                           <div className={themeClasses.text}>
@@ -561,7 +591,9 @@ const BookedSlotsPage: React.FC = () => {
                           </div>
                         </div>
                         <div>
-                          <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary} mb-1`}
+                          >
                             Email
                           </div>
                           <div className={themeClasses.text}>
@@ -572,32 +604,48 @@ const BookedSlotsPage: React.FC = () => {
                     </div>
 
                     {/* Parking Details */}
-                    <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-6 mb-6`}>
-                      <h3 className={`text-lg font-bold ${themeClasses.text} mb-4`}>
+                    <div
+                      className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-6 mb-6`}
+                    >
+                      <h3
+                        className={`text-lg font-bold ${themeClasses.text} mb-4`}
+                      >
                         Parking Details
                       </h3>
                       <div className="space-y-4">
                         <div>
-                          <div className={`text-2xl font-bold ${themeClasses.text} mb-1`}>
-                            {selectedBooking.parkingId?.name || "Unknown Parking"}
+                          <div
+                            className={`text-2xl font-bold ${themeClasses.text} mb-1`}
+                          >
+                            {selectedBooking.parkingId?.name ||
+                              "Unknown Parking"}
                           </div>
-                          <div className={`flex items-center gap-2 ${themeClasses.textSecondary}`}>
+                          <div
+                            className={`flex items-center gap-2 ${themeClasses.textSecondary}`}
+                          >
                             <Icons.MapPin className="w-4 h-4" />
-                            {selectedBooking.parkingId?.location || "Location not specified"}
+                            {selectedBooking.parkingId?.location ||
+                              "Location not specified"}
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="text-center">
-                            <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
+                            <div
+                              className={`text-sm ${themeClasses.textSecondary} mb-1`}
+                            >
                               Duration
                             </div>
-                            <div className={`text-xl font-bold ${themeClasses.text}`}>
+                            <div
+                              className={`text-xl font-bold ${themeClasses.text}`}
+                            >
                               {selectedBooking.duration || 1} hr
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
+                            <div
+                              className={`text-sm ${themeClasses.textSecondary} mb-1`}
+                            >
                               Rate/Hour
                             </div>
                             <div className="text-xl font-bold text-[#1B42CB]">
@@ -605,10 +653,14 @@ const BookedSlotsPage: React.FC = () => {
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
+                            <div
+                              className={`text-sm ${themeClasses.textSecondary} mb-1`}
+                            >
                               Start Time
                             </div>
-                            <div className={`text-lg font-semibold ${themeClasses.text}`}>
+                            <div
+                              className={`text-lg font-semibold ${themeClasses.text}`}
+                            >
                               {selectedBooking.bookingDate
                                 ? new Date(
                                     selectedBooking.bookingDate,
@@ -620,10 +672,14 @@ const BookedSlotsPage: React.FC = () => {
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className={`text-sm ${themeClasses.textSecondary} mb-1`}>
+                            <div
+                              className={`text-sm ${themeClasses.textSecondary} mb-1`}
+                            >
                               End Time
                             </div>
-                            <div className={`text-lg font-semibold ${themeClasses.text}`}>
+                            <div
+                              className={`text-lg font-semibold ${themeClasses.text}`}
+                            >
                               {calculateEndTime(
                                 selectedBooking.bookingDate,
                                 selectedBooking.duration,
@@ -635,20 +691,32 @@ const BookedSlotsPage: React.FC = () => {
                     </div>
 
                     {/* Payment Summary */}
-                    <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-6`}>
-                      <h3 className={`text-lg font-bold ${themeClasses.text} mb-4`}>
+                    <div
+                      className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-6`}
+                    >
+                      <h3
+                        className={`text-lg font-bold ${themeClasses.text} mb-4`}
+                      >
                         Payment Summary
                       </h3>
                       <div className="space-y-3">
-                        <div className={`flex justify-between items-center py-2 border-b ${themeClasses.border}`}>
-                          <div className={themeClasses.textSecondary}>Hourly Rate</div>
+                        <div
+                          className={`flex justify-between items-center py-2 border-b ${themeClasses.border}`}
+                        >
+                          <div className={themeClasses.textSecondary}>
+                            Hourly Rate
+                          </div>
                           <div className={themeClasses.text}>
                             ₹{selectedBooking.parkingId?.pricePerHour || 0} ×{" "}
                             {selectedBooking.duration || 1} hours
                           </div>
                         </div>
-                        <div className={`flex justify-between items-center py-2 border-b ${themeClasses.border}`}>
-                          <div className={themeClasses.textSecondary}>Subtotal</div>
+                        <div
+                          className={`flex justify-between items-center py-2 border-b ${themeClasses.border}`}
+                        >
+                          <div className={themeClasses.textSecondary}>
+                            Subtotal
+                          </div>
                           <div className={themeClasses.text}>
                             ₹
                             {(selectedBooking.parkingId?.pricePerHour || 0) *
@@ -656,10 +724,14 @@ const BookedSlotsPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex justify-between items-center py-2">
-                          <div className={`text-lg font-bold ${themeClasses.text}`}>
+                          <div
+                            className={`text-lg font-bold ${themeClasses.text}`}
+                          >
                             Total Amount
                           </div>
-                          <div className={`text-2xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}>
+                          <div
+                            className={`text-2xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}
+                          >
                             ₹
                             {selectedBooking.totalPrice ||
                               selectedBooking.parkingId?.pricePerHour ||
@@ -686,7 +758,9 @@ const BookedSlotsPage: React.FC = () => {
                             </span>
                           </div>
                         </div>
-                        <div className={`text-center ${themeClasses.textSecondary} text-sm`}>
+                        <div
+                          className={`text-center ${themeClasses.textSecondary} text-sm`}
+                        >
                           <p>Thank you for choosing our parking service!</p>
                           <p>For any queries, contact support@parking.com</p>
                         </div>
@@ -697,7 +771,9 @@ const BookedSlotsPage: React.FC = () => {
               </div>
 
               {/* Modal Footer with Download Button */}
-              <div className={`px-6 py-4 ${themeClasses.cardBg} border-t ${themeClasses.border}`}>
+              <div
+                className={`px-6 py-4 ${themeClasses.cardBg} border-t ${themeClasses.border}`}
+              >
                 <div className="flex justify-end gap-4">
                   <button
                     onClick={() => setShowReceiptModal(false)}
@@ -732,15 +808,21 @@ const BookedSlotsPage: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
         <header className="mb-8 md:mb-12">
-          <div className={`backdrop-blur-xl bg-[#1B42CB]/10 border ${themeClasses.border} rounded-2xl p-6 md:p-8 shadow-2xl shadow-[#1B42CB]/10`}>
+          <div
+            className={`backdrop-blur-xl bg-[#1B42CB]/10 border ${themeClasses.border} rounded-2xl p-6 md:p-8 shadow-2xl shadow-[#1B42CB]/10`}
+          >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
                 <div className="flex items-center gap-4 mb-3">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${themeClasses.gradient.accent} flex items-center justify-center`}
+                  >
                     <Icons.Calendar className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}>
+                    <h1
+                      className={`text-3xl md:text-4xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}
+                    >
                       My Bookings
                     </h1>
                     <p className={themeClasses.textSecondary}>
@@ -750,10 +832,14 @@ const BookedSlotsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-4`}>
+              <div
+                className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-4`}
+              >
                 <div className="grid grid-cols-2 gap-6">
                   <div className="text-center">
-                    <div className={`text-2xl font-bold ${themeClasses.text} mb-1`}>
+                    <div
+                      className={`text-2xl font-bold ${themeClasses.text} mb-1`}
+                    >
                       {bookedSlots.length}
                     </div>
                     <div className={`text-sm ${themeClasses.textSecondary}`}>
@@ -761,13 +847,17 @@ const BookedSlotsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-bold ${themeClasses.text} mb-1`}>
+                    <div
+                      className={`text-2xl font-bold ${themeClasses.text} mb-1`}
+                    >
                       {
                         bookedSlots.filter((b) => b.bookingStatus === "active")
                           .length
                       }
                     </div>
-                    <div className={`text-sm ${themeClasses.textSecondary}`}>Active</div>
+                    <div className={`text-sm ${themeClasses.textSecondary}`}>
+                      Active
+                    </div>
                   </div>
                 </div>
               </div>
@@ -776,7 +866,9 @@ const BookedSlotsPage: React.FC = () => {
         </header>
 
         {/* Controls */}
-        <div className={`mb-8 backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}>
+        <div
+          className={`mb-8 backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-6 shadow-xl`}
+        >
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
@@ -816,8 +908,12 @@ const BookedSlotsPage: React.FC = () => {
 
         {/* Bookings List */}
         {filteredBookings.length === 0 ? (
-          <div className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-12 text-center`}>
-            <div className={`w-24 h-24 bg-gradient-to-br from-[#1B42CB]/20 to-[#FF2F6C]/20 rounded-full flex items-center justify-center mx-auto mb-6 border ${themeClasses.border}`}>
+          <div
+            className={`backdrop-blur-xl ${themeClasses.cardBg} border ${themeClasses.border} rounded-2xl p-12 text-center`}
+          >
+            <div
+              className={`w-24 h-24 bg-gradient-to-br from-[#1B42CB]/20 to-[#FF2F6C]/20 rounded-full flex items-center justify-center mx-auto mb-6 border ${themeClasses.border}`}
+            >
               <Icons.Inbox className="w-10 h-10 text-[#1B42CB]" />
             </div>
             <h3 className={`text-2xl font-bold ${themeClasses.text} mb-3`}>
@@ -859,7 +955,9 @@ const BookedSlotsPage: React.FC = () => {
                       <span className="font-bold text-sm">
                         {getStatusText(booking.bookingStatus || "")}
                       </span>
-                      <span className={`text-xs px-2 py-1 bg-black/20 rounded-full ${themeClasses.text}`}>
+                      <span
+                        className={`text-xs px-2 py-1 bg-black/20 rounded-full ${themeClasses.text}`}
+                      >
                         Booking ID: {booking._id.substring(0, 8)}...
                       </span>
                     </div>
@@ -876,10 +974,14 @@ const BookedSlotsPage: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-6">
                         <div>
-                          <h3 className={`text-xl font-bold ${themeClasses.text} mb-2`}>
+                          <h3
+                            className={`text-xl font-bold ${themeClasses.text} mb-2`}
+                          >
                             {booking.parkingId?.name || "Unknown Parking"}
                           </h3>
-                          <div className={`flex items-center gap-4 ${themeClasses.textSecondary}`}>
+                          <div
+                            className={`flex items-center gap-4 ${themeClasses.textSecondary}`}
+                          >
                             <div className="flex items-center gap-2">
                               <Icons.MapPin className="w-4 h-4" />
                               <span>
@@ -895,10 +997,14 @@ const BookedSlotsPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className={`text-2xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}>
+                          <div
+                            className={`text-2xl font-bold bg-gradient-to-r ${themeClasses.gradient.accent} bg-clip-text text-transparent`}
+                          >
                             ₹{booking.parkingId?.pricePerHour || 0}
                           </div>
-                          <div className={`text-sm ${themeClasses.textSecondary}`}>
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary}`}
+                          >
                             per hour
                           </div>
                         </div>
@@ -906,31 +1012,49 @@ const BookedSlotsPage: React.FC = () => {
 
                       {/* Booking Details Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                        <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}>
-                          <div className={`text-sm ${themeClasses.textSecondary} mb-2`}>
+                        <div
+                          className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}
+                        >
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary} mb-2`}
+                          >
                             Duration
                           </div>
-                          <div className={`text-lg font-bold ${themeClasses.text}`}>
+                          <div
+                            className={`text-lg font-bold ${themeClasses.text}`}
+                          >
                             {booking.duration || 1} hour
                             {booking.duration !== 1 ? "s" : ""}
                           </div>
                         </div>
-                        <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}>
-                          <div className={`text-sm ${themeClasses.textSecondary} mb-2`}>
+                        <div
+                          className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}
+                        >
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary} mb-2`}
+                          >
                             Total Price
                           </div>
-                          <div className={`text-lg font-bold ${themeClasses.text}`}>
+                          <div
+                            className={`text-lg font-bold ${themeClasses.text}`}
+                          >
                             ₹
                             {booking.totalPrice ||
                               booking.parkingId?.pricePerHour ||
                               0}
                           </div>
                         </div>
-                        <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}>
-                          <div className={`text-sm ${themeClasses.textSecondary} mb-2`}>
+                        <div
+                          className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}
+                        >
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary} mb-2`}
+                          >
                             Parking End
                           </div>
-                          <div className={`text-lg font-bold ${themeClasses.text}`}>
+                          <div
+                            className={`text-lg font-bold ${themeClasses.text}`}
+                          >
                             {calculateEndTime(
                               booking.bookingDate,
                               booking.duration,
@@ -940,12 +1064,18 @@ const BookedSlotsPage: React.FC = () => {
                       </div>
 
                       {/* Slot Availability */}
-                      <div className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}>
+                      <div
+                        className={`bg-black/5 dark:bg-[#191919]/50 border ${themeClasses.border} rounded-xl p-4`}
+                      >
                         <div className="flex justify-between items-center mb-3">
-                          <div className={`text-sm font-medium ${themeClasses.text}`}>
+                          <div
+                            className={`text-sm font-medium ${themeClasses.text}`}
+                          >
                             Slot Availability
                           </div>
-                          <div className={`text-sm ${themeClasses.textSecondary}`}>
+                          <div
+                            className={`text-sm ${themeClasses.textSecondary}`}
+                          >
                             {booking.parkingId?.availableSlots || 0}/
                             {booking.parkingId?.capacity || 0} available
                           </div>
@@ -966,10 +1096,16 @@ const BookedSlotsPage: React.FC = () => {
                     </div>
 
                     {/* Action Panel */}
-                    <div className={`lg:w-64 border-l lg:border-l-0 lg:border-t ${themeClasses.border} lg:pl-6 lg:pt-0 pt-6`}>
+                    <div
+                      className={`lg:w-64 border-l lg:border-l-0 lg:border-t ${themeClasses.border} lg:pl-6 lg:pt-0 pt-6`}
+                    >
                       <div className="space-y-4">
-                        <div className={`bg-gradient-to-br from-[#1B42CB]/10 to-[#FF2F6C]/10 rounded-xl p-4`}>
-                          <div className={`text-sm font-medium ${themeClasses.text} mb-2`}>
+                        <div
+                          className={`bg-gradient-to-br from-[#1B42CB]/10 to-[#FF2F6C]/10 rounded-xl p-4`}
+                        >
+                          <div
+                            className={`text-sm font-medium ${themeClasses.text} mb-2`}
+                          >
                             Quick Actions
                           </div>
                           <div className="space-y-2">
@@ -1044,7 +1180,9 @@ const BookedSlotsPage: React.FC = () => {
                           )}
                         </button>
 
-                        <div className={`text-xs ${themeClasses.textSecondary} text-center pt-2`}>
+                        <div
+                          className={`text-xs ${themeClasses.textSecondary} text-center pt-2`}
+                        >
                           {booking.bookingStatus === "active" && (
                             <p>You can cancel up to 1 hour before start time</p>
                           )}
@@ -1060,7 +1198,9 @@ const BookedSlotsPage: React.FC = () => {
 
         {/* Summary Footer */}
         {bookedSlots.length > 0 && (
-          <div className={`mt-8 backdrop-blur-xl bg-gradient-to-r from-[#1B42CB]/10 to-[#FF2F6C]/10 border ${themeClasses.border} rounded-2xl p-6`}>
+          <div
+            className={`mt-8 backdrop-blur-xl bg-gradient-to-r from-[#1B42CB]/10 to-[#FF2F6C]/10 border ${themeClasses.border} rounded-2xl p-6`}
+          >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className={`text-2xl font-bold ${themeClasses.text} mb-2`}>
@@ -1069,7 +1209,9 @@ const BookedSlotsPage: React.FC = () => {
                       .length
                   }
                 </div>
-                <div className={themeClasses.textSecondary}>Active Bookings</div>
+                <div className={themeClasses.textSecondary}>
+                  Active Bookings
+                </div>
               </div>
               <div className="text-center">
                 <div className={`text-2xl font-bold ${themeClasses.text} mb-2`}>
