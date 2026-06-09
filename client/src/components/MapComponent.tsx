@@ -1,6 +1,10 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useRouteNavigation } from "../hooks/useRouteNavigation";
+import { Navigation, Loader2, X } from "lucide-react";
+import { getUserLocation } from "../utils/geolocation";
 
 // Fix for default icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -61,12 +65,67 @@ interface MapComponentProps {
   loading?: boolean;
 }
 
+// FitBounds component to auto-adjust map viewport to route bounds
+interface FitBoundsProps {
+  coords: [number, number][];
+}
+
+const FitBounds: React.FC<FitBoundsProps> = ({ coords }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (coords && coords.length > 1) {
+      map.fitBounds(coords, { padding: [30, 30] });
+    }
+  }, [coords, map]);
+  return null;
+};
+
 const MapComponent: React.FC<MapComponentProps> = ({
   parkingSlots,
   loading = false,
 }) => {
   // Default center (Delhi)
   const defaultCenter: [number, number] = [28.6139, 77.209];
+
+  // Routing states
+  const { routeCoords, loading: routingLoading, error: routingError, calculateRoute, clearRoute } = useRouteNavigation();
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+
+  // Try to locate user on map initialization
+  useEffect(() => {
+    getUserLocation()
+      .then((loc) => {
+        setUserLoc([loc.lat, loc.lng]);
+      })
+      .catch((err) => {
+        console.warn("Initial user location fetch failed:", err);
+      });
+  }, []);
+
+  const handleNavigate = (slot: ParkingSlot) => {
+    if (!slot.coordinates || typeof slot.coordinates.lat !== "number" || typeof slot.coordinates.lng !== "number") {
+      alert("Error: Parking slot coordinates are missing or invalid.");
+      return;
+    }
+
+    setGeoError(null);
+
+    getUserLocation()
+      .then((loc) => {
+        setUserLoc([loc.lat, loc.lng]);
+        calculateRoute(loc.lat, loc.lng, slot.coordinates.lat, slot.coordinates.lng);
+      })
+      .catch((err) => {
+        console.warn("MapComponent geolocation failed:", err);
+        setGeoError(err.message);
+      });
+  };
+
+  const handleClearRoute = () => {
+    clearRoute();
+    setGeoError(null);
+  };
 
   if (loading) {
     return (
@@ -112,9 +171,36 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             </div>
 
-            <div className="h-48 bg-[#191919]/50 rounded-xl overflow-hidden">
+            <div className="h-48 bg-[#191919]/50 rounded-xl overflow-hidden relative">
+              {/* Routing overlays */}
+              {routingLoading && (
+                <div className="absolute inset-0 bg-black/60 z-[1000] flex items-center justify-center gap-2 text-[#EEECF6] text-sm font-semibold">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                  Generating route...
+                </div>
+              )}
+
+              {(geoError || routingError) && (
+                <div className="absolute inset-x-0 top-0 bg-red-600/90 text-white px-3 py-2 text-xs font-semibold z-[1000] flex justify-between items-center">
+                  <span className="truncate pr-2">Error: {geoError || routingError}</span>
+                  <button onClick={handleClearRoute} className="hover:opacity-80 shrink-0">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {routeCoords.length > 0 && (
+                <button
+                  onClick={handleClearRoute}
+                  className="absolute bottom-2 left-2 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-bold z-[1000] flex items-center gap-1 shadow-md transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  Clear Route
+                </button>
+              )}
+
               <MapContainer
-                center={defaultCenter}
+                center={userLoc || defaultCenter}
                 zoom={13}
                 style={{ height: "100%", width: "100%" }}
                 scrollWheelZoom={true}
@@ -126,9 +212,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 />
 
                 {/* User location marker */}
-                <Marker position={defaultCenter} icon={userIcon}>
+                <Marker position={userLoc || defaultCenter} icon={userIcon}>
                   <Popup>
-                    <div className="font-semibold">Your Location</div>
+                    <div className="font-semibold text-gray-800">Your Location</div>
                   </Popup>
                 </Marker>
 
@@ -144,7 +230,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       icon={createParkingIcon(status)}
                     >
                       <Popup>
-                        <div className="p-2 min-w-[200px]">
+                        <div className="p-2 min-w-[200px] text-gray-800">
                           <h3 className="font-bold text-lg text-gray-800">
                             {slot.name || "Unknown Parking"}
                           </h3>
@@ -206,14 +292,37 @@ const MapComponent: React.FC<MapComponentProps> = ({
                             </div>
                           )}
 
-                          <div className="mt-3 text-xs text-gray-500">
+                          <div className="mt-3 text-xs text-gray-500 mb-2">
                             Timings: {slot.openingTime || "N/A"} - {slot.closingTime || "N/A"}
                           </div>
+
+                          <button
+                            onClick={() => handleNavigate(slot)}
+                            disabled={routingLoading}
+                            className="mt-3 w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Navigate to this parking spot"
+                          >
+                            <Navigation className="w-3 h-3" />
+                            Navigate
+                          </button>
                         </div>
                       </Popup>
                     </Marker>
                   );
                 })}
+
+                {/* Route drawing */}
+                {routeCoords.length > 0 && (
+                  <>
+                    <Polyline
+                      positions={routeCoords}
+                      pathOptions={{ color: "#1B42CB", weight: 5 }}
+                      color="#1B42CB"
+                      weight={5}
+                    />
+                    <FitBounds coords={routeCoords} />
+                  </>
+                )}
               </MapContainer>
             </div>
 

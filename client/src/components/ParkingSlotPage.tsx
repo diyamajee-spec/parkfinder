@@ -4,6 +4,59 @@ import * as Icons from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import PredictionPanel from "./PredictionPanel";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import { useRouteNavigation } from "../hooks/useRouteNavigation";
+import { getUserLocation } from "../utils/geolocation";
+
+// Fix for default Leaflet icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
+
+// Custom parking icon
+const createParkingIcon = (status: string) => {
+  const statusLower = (status || "unknown").toLowerCase();
+  return new L.Icon({
+    iconUrl:
+      statusLower === "available"
+        ? "https://cdn-icons-png.flaticon.com/512/3178/3178283.png" // Green parking icon
+        : "https://cdn-icons-png.flaticon.com/512/3178/3178295.png", // Red parking icon
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+    className: "parking-marker",
+  });
+};
+
+// User location icon
+const userIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28],
+});
+
+interface FitBoundsProps {
+  coords: [number, number][];
+}
+
+const FitBounds: React.FC<FitBoundsProps> = ({ coords }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (coords && coords.length > 1) {
+      map.fitBounds(coords, { padding: [50, 50] });
+    }
+  }, [coords, map]);
+  return null;
+};
 
 interface ParkingSlot {
   _id: string;
@@ -147,7 +200,44 @@ const ParkingSlotPage: React.FC = () => {
   const [duration, setDuration] = useState(1);
 
   // State for tracking favorited location IDs
-  const [favorites, setFavorites] = useState<string[]>([]);
+  // const [favorites, setFavorites] = useState<string[]>([]);
+
+  // Navigation & routing hook usage
+  const { routeCoords, loading: routingLoading, error: routingError, calculateRoute, clearRoute } = useRouteNavigation();
+  const [geoError, setGeoError] = useState<string | null>(null);
+
+  const handleNavigate = (slot: ParkingSlot) => {
+    if (!slot.coordinates || typeof slot.coordinates.lat !== "number" || typeof slot.coordinates.lng !== "number") {
+      alert("Error: Parking slot coordinates are missing or invalid.");
+      return;
+    }
+
+    const destLat = slot.coordinates.lat;
+    const destLng = slot.coordinates.lng;
+
+    setGeoError(null);
+
+    getUserLocation()
+      .then((loc) => {
+        setUserLocation(loc);
+        calculateRoute(loc.lat, loc.lng, destLat, destLng).then((res) => {
+          if (res) {
+            setViewMode("map");
+            setSelectedMapSlot(slot);
+          }
+        });
+      })
+      .catch((err) => {
+        console.warn("Geolocation failed for route:", err);
+        setGeoError(err.message);
+        alert(`❌ Location Error: ${err.message}`);
+      });
+  };
+
+  const handleClearRoute = () => {
+    clearRoute();
+    setGeoError(null);
+  };
 
   const { token, user } = useAuth();
 
@@ -239,92 +329,84 @@ const ParkingSlotPage: React.FC = () => {
   };
 
   // Fetch user's favorite locations
-  const fetchFavorites = async () => {
-    if (!token) return;
-    try {
-      const res = await fetch(`/api/favorites`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Extract just the IDs so it's easy to check `favorites.includes(id)`
-        const favoriteIds = data.data.map((fav: any) => fav._id);
-        setFavorites(favoriteIds);
-      }
-    } catch (err) {
-      console.error("Failed to fetch favorites:", err);
-    }
-  };
+  // const fetchFavorites = async () => {
+  //   if (!token) return;
+  //   try {
+  //     const res = await fetch(`/api/favorites`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       // Extract just the IDs so it's easy to check `favorites.includes(id)`
+  //       const favoriteIds = data.data.map((fav: any) => fav._id);
+  //       setFavorites(favoriteIds);
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to fetch favorites:", err);
+  //   }
+  // };
 
   useEffect(() => {
     // Get user location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.warn("Geolocation error:", error);
-          setUserLocation({ lat: 28.6139, lng: 77.209 });
-        },
-      );
-    } else {
-      setUserLocation({ lat: 28.6139, lng: 77.209 });
-    }
+    getUserLocation()
+      .then((loc) => {
+        setUserLocation(loc);
+      })
+      .catch((error) => {
+        console.warn("Initial user location fetch failed, using fallback Delhi coordinates:", error);
+        setUserLocation({ lat: 28.6139, lng: 77.209 });
+      });
 
     fetchParkingSlots();
   }, []);
 
   // Fetch favorites separately to ensure it runs when token is available
-  useEffect(() => {
-    if (token) {
-      fetchFavorites();
-    }
-  }, [token]);
+  // useEffect(() => {
+  //   if (token) {
+  //     fetchFavorites();
+  //   }
+  // }, [token]);
 
   // Handle Toggle Favorite Button Click
-  const handleToggleFavorite = async (
-    e: React.MouseEvent,
-    locationId: string,
-  ) => {
-    e.stopPropagation(); // Prevents map markers from triggering if nested
-
-    if (!token || !user) {
-      alert("Please login to save favorite locations");
-      navigate("/login");
-      return;
-    }
-
-    try {
-      // Optimistically update UI
-      setFavorites((prev) =>
-        prev.includes(locationId)
-          ? prev.filter((id) => id !== locationId)
-          : [...prev, locationId],
-      );
-
-      const res = await fetch(`/api/favorites/${locationId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await res.json();
-      if (!data.success) {
-        // Revert on failure
-        fetchFavorites();
-        console.error("Failed to toggle favorite:", data.message);
-      }
-    } catch (err) {
-      console.error("Error toggling favorite:", err);
-      fetchFavorites(); // Revert on failure
-    }
-  };
+  // const handleToggleFavorite = async (
+  //   e: React.MouseEvent,
+  //   locationId: string,
+  // ) => {
+  //   e.stopPropagation(); // Prevents map markers from triggering if nested
+  // 
+  //   if (!token || !user) {
+  //     alert("Please login to save favorite locations");
+  //     navigate("/login");
+  //     return;
+  //   }
+  // 
+  //   try {
+  //     // Optimistically update UI
+  //     setFavorites((prev) =>
+  //       prev.includes(locationId)
+  //         ? prev.filter((id) => id !== locationId)
+  //         : [...prev, locationId],
+  //     );
+  // 
+  //     const res = await fetch(`/api/favorites/${locationId}`, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  // 
+  //     const data = await res.json();
+  //     if (!data.success) {
+  //       // Revert on failure
+  //       fetchFavorites();
+  //       console.error("Failed to toggle favorite:", data.message);
+  //     }
+  //   } catch (err) {
+  //     console.error("Error toggling favorite:", err);
+  //     fetchFavorites(); // Revert on failure
+  //   }
+  // };
 
   // Calculate distance between two coordinates
   const calculateDistance = (
@@ -350,10 +432,10 @@ const ParkingSlotPage: React.FC = () => {
   };
 
   // Get directions URL
-  const getDirectionsUrl = (slot: ParkingSlot) => {
-    if (!slot.coordinates) return "#";
-    return `https://www.google.com/maps/dir/?api=1&destination=${slot.coordinates.lat},${slot.coordinates.lng}`;
-  };
+  // const getDirectionsUrl = (slot: ParkingSlot) => {
+  //   if (!slot.coordinates) return "#";
+  //   return `https://www.google.com/maps/dir/?api=1&destination=${slot.coordinates.lat},${slot.coordinates.lng}`;
+  // };
 
   const handleBookNow = (slot: ParkingSlot) => {
     if (!token || !user) {
@@ -546,129 +628,144 @@ const ParkingSlotPage: React.FC = () => {
         <div
           className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-2xl overflow-hidden shadow-xl`}
         >
-          <div className="h-[500px] relative">
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-[#1B42CB]/20 to-[#FF2F6C]/20"
-              style={{
-                backgroundImage: `
-                  radial-gradient(circle at 20% 30%, #1B42CB 2px, transparent 2px),
-                  radial-gradient(circle at 50% 50%, #FF2F6C 3px, transparent 3px),
-                  radial-gradient(circle at 80% 70%, #1B42CB 2px, transparent 2px)
-                `,
-                backgroundSize: "100px 100px",
-              }}
-            >
-              <div
-                className="absolute w-8 h-8 transform -translate-x-1/2 -translate-y-1/2"
-                style={{ left: "50%", top: "50%" }}
-              >
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 border-2 border-white shadow-lg animate-pulse"></div>
-                <div className="absolute inset-0 rounded-full bg-blue-400 animate-ping opacity-30"></div>
+          <div className="h-[500px] relative z-10">
+            {/* Routing overlays */}
+            {routingLoading && (
+              <div className="absolute inset-0 bg-black/60 z-[1000] flex items-center justify-center gap-2 text-[#EEECF6] text-sm font-semibold">
+                <Icons.Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                Generating route...
               </div>
+            )}
 
-              {filteredAndSortedSlots.map((slot, index) => {
+            {(geoError || routingError) && (
+              <div className="absolute inset-x-0 top-0 bg-red-600/90 text-white px-3 py-2 text-xs font-semibold z-[1000] flex justify-between items-center">
+                <span className="truncate pr-2">Error: {geoError || routingError}</span>
+                <button onClick={handleClearRoute} className="hover:opacity-80 shrink-0">
+                  <Icons.X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {routeCoords.length > 0 && (
+              <button
+                onClick={handleClearRoute}
+                className="absolute bottom-2 left-2 bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-xs font-bold z-[1000] flex items-center gap-1 shadow-md transition-colors"
+              >
+                <Icons.X className="w-3 h-3" />
+                Clear Route
+              </button>
+            )}
+
+            <MapContainer
+              center={userLocation ? [userLocation.lat, userLocation.lng] : [28.6139, 77.209]}
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+              scrollWheelZoom={true}
+              zoomControl={false}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              {/* User location marker */}
+              {userLocation && (
+                <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+                  <Popup>
+                    <div className="font-semibold text-gray-800">Your Location</div>
+                  </Popup>
+                </Marker>
+              )}
+
+              {/* Parking slots markers */}
+              {filteredAndSortedSlots.map((slot) => {
                 if (!slot.coordinates) return null;
-                const latDiff = slot.coordinates.lat - userLocation.lat;
-                const lngDiff = slot.coordinates.lng - userLocation.lng;
-                const left = 50 + lngDiff * 100;
-                const top = 50 - latDiff * 100;
+                const status = slot.status || "unknown";
 
                 return (
-                  <div
+                  <Marker
                     key={slot._id}
-                    className={`absolute w-10 h-10 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-125 ${
-                      selectedMapSlot?._id === slot._id ? "z-10 scale-125" : ""
-                    }`}
-                    style={{
-                      left: `${Math.max(10, Math.min(90, left))}%`,
-                      top: `${Math.max(10, Math.min(90, top))}%`,
+                    position={[slot.coordinates.lat, slot.coordinates.lng]}
+                    icon={createParkingIcon(status)}
+                    eventHandlers={{
+                      click: () => {
+                        setSelectedMapSlot(slot);
+                      },
                     }}
-                    onClick={() => setSelectedMapSlot(slot)}
                   >
-                    <div
-                      className={`
-                      w-full h-full rounded-full flex items-center justify-center
-                      ${
-                        slot.status === "available"
-                          ? "bg-gradient-to-br from-green-500 to-emerald-400"
-                          : slot.status === "occupied"
-                            ? "bg-gradient-to-br from-red-500 to-pink-400"
-                            : "bg-gradient-to-br from-yellow-500 to-orange-400"
-                      }
-                      border-2 border-white shadow-lg
-                    `}
-                    >
-                      <span className="text-white text-xs font-bold">
-                        P{index + 1}
-                      </span>
-                    </div>
-                    {selectedMapSlot?._id === slot._id && (
-                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-                        <div
-                          className={`${themeClasses.cardBgSecondary} ${themeClasses.cardBorder} border rounded-xl p-3 shadow-xl min-w-[200px]`}
-                        >
-                          <div
-                            className={`font-bold ${themeClasses.text} text-sm mb-1`}
+                    <Popup>
+                      <div className="p-2 min-w-[200px] text-gray-800">
+                        <h3 className="font-bold text-base text-gray-900 mb-1">{slot.name}</h3>
+                        <p className="text-xs text-gray-600 mb-2">{slot.location}</p>
+                        <div className="flex justify-between items-center text-xs font-semibold mb-2">
+                          <span>₹{slot.pricePerHour}/hr</span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded-full ${
+                              slot.status === "available"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
-                            {slot.name}
-                          </div>
-                          <div
-                            className={`text-xs ${themeClasses.textSecondary} mb-2`}
-                          >
-                            {slot.location}
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className={`${themeClasses.text} font-bold`}>
-                              ₹{slot.pricePerHour}
-                            </span>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full ${
-                                slot.status === "available"
-                                  ? "bg-green-500/20 text-green-300"
-                                  : slot.status === "occupied"
-                                    ? "bg-red-500/20 text-red-300"
-                                    : "bg-yellow-500/20 text-yellow-300"
-                              }`}
-                            >
-                              {getStatusBadge(slot.status)}
-                            </span>
-                          </div>
+                            {slot.status}
+                          </span>
                         </div>
+                        <button
+                          onClick={() => handleNavigate(slot)}
+                          disabled={routingLoading}
+                          className="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold transition-colors flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Navigate to this parking spot"
+                        >
+                          <Icons.Navigation className="w-3 h-3" />
+                          Navigate
+                        </button>
                       </div>
-                    )}
-                  </div>
+                    </Popup>
+                  </Marker>
                 );
               })}
 
-              {/* Map Legend */}
-              <div
-                className={`absolute bottom-4 right-4 backdrop-blur-xl ${themeClasses.cardBgSecondary} ${themeClasses.cardBorder} border rounded-xl p-4`}
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-400"></div>
-                    <span className={`text-xs ${themeClasses.text}`}>
-                      Available
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-500 to-pink-400"></div>
-                    <span className={`text-xs ${themeClasses.text}`}>
-                      Occupied
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-500 to-orange-400"></div>
-                    <span className={`text-xs ${themeClasses.text}`}>
-                      Maintenance
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400"></div>
-                    <span className={`text-xs ${themeClasses.text}`}>
-                      Your Location
-                    </span>
-                  </div>
+              {/* Route line drawing */}
+              {routeCoords.length > 0 && (
+                <>
+                  <Polyline
+                    positions={routeCoords}
+                    pathOptions={{ color: "#1B42CB", weight: 5 }}
+                    color="#1B42CB"
+                    weight={5}
+                  />
+                  <FitBounds coords={routeCoords} />
+                </>
+              )}
+            </MapContainer>
+
+            {/* Map Legend */}
+            <div
+              className={`absolute bottom-4 right-4 backdrop-blur-xl ${themeClasses.cardBgSecondary} ${themeClasses.cardBorder} border rounded-xl p-4 z-[1000] pointer-events-none`}
+            >
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-400"></div>
+                  <span className={`text-xs ${themeClasses.text}`}>
+                    Available
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-500 to-pink-400"></div>
+                  <span className={`text-xs ${themeClasses.text}`}>
+                    Occupied
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-500 to-orange-400"></div>
+                  <span className={`text-xs ${themeClasses.text}`}>
+                    Maintenance
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400"></div>
+                  <span className={`text-xs ${themeClasses.text}`}>
+                    Your Location
+                  </span>
                 </div>
               </div>
             </div>
@@ -768,15 +865,15 @@ const ParkingSlotPage: React.FC = () => {
             {/* -------------------------------------- */}
 
             <div className="flex gap-3">
-              <a
-                href={getDirectionsUrl(selectedMapSlot)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex-1 px-6 py-3 ${themeClasses.cardBgSecondary} border ${themeClasses.border} ${themeClasses.text} font-semibold rounded-xl ${themeClasses.hover} transition-all duration-300 flex items-center justify-center gap-2`}
+              <button
+                onClick={() => handleNavigate(selectedMapSlot)}
+                disabled={routingLoading}
+                className={`flex-1 px-6 py-3 ${themeClasses.cardBgSecondary} border ${themeClasses.border} ${themeClasses.text} font-semibold rounded-xl ${themeClasses.hover} transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Navigate to this parking spot"
               >
                 <Icons.Navigation className="w-4 h-4" />
-                Get Directions
-              </a>
+                Navigate
+              </button>
               <button
                 onClick={() => setPredictionSlot(selectedMapSlot)}
                 className={`px-4 py-3 ${themeClasses.cardBgSecondary} border ${themeClasses.border} ${themeClasses.textSecondary} font-semibold rounded-xl ${themeClasses.hover} transition-all duration-300 flex items-center justify-center gap-2`}
@@ -1014,15 +1111,15 @@ const ParkingSlotPage: React.FC = () => {
                     <Icons.TrendingUp className="w-4 h-4" />
                     Forecast
                   </button>
-                  <a
-                    href={getDirectionsUrl(slot)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex-1 px-4 py-3 ${themeClasses.cardBgSecondary} border ${themeClasses.border} ${themeClasses.text} rounded-lg ${themeClasses.hover} transition-colors flex items-center justify-center gap-2`}
+                  <button
+                    onClick={() => handleNavigate(slot)}
+                    disabled={routingLoading}
+                    className={`flex-1 px-4 py-3 ${themeClasses.cardBgSecondary} border ${themeClasses.border} ${themeClasses.text} rounded-lg ${themeClasses.hover} transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    title="Navigate to this parking spot"
                   >
                     <Icons.Navigation className="w-4 h-4" />
-                    Directions
-                  </a>
+                    Navigate
+                  </button>
                   <button
                     onClick={() => handleBookNow(slot)}
                     disabled={
