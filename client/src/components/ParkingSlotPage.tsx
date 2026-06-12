@@ -1238,7 +1238,9 @@ const ParkingSlotPage: React.FC = () => {
                     <div
                       className={`text-3xl font-bold ${themeClasses.text} mb-1`}
                     >
-                      ₹{Math.min(...parkingSlots.map((s) => s.pricePerHour))}
+                      {parkingSlots.length > 0
+  ? `₹${Math.min(...parkingSlots.map((s: ParkingSlot) => s.pricePerHour))}`
+  : "N/A"}
                     </div>
                     <div className={`text-sm ${themeClasses.textSecondary}`}>
                       Starting Price
