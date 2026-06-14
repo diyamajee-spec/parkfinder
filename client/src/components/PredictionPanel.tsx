@@ -40,6 +40,9 @@ const PredictionPanel: React.FC<PredictionPanelProps> = ({
       try {
         setLoading(true);
         const res = await fetch(`/api/predictions/${parkingId}`);
+        if (!res.ok) {
+        throw new Error(`Server error: ${res.status} ${res.statusText}`);
+      }
         const data = await res.json();
         if (data.success) {
           setPredictions(data.data);
@@ -47,7 +50,8 @@ const PredictionPanel: React.FC<PredictionPanelProps> = ({
         } else {
           setError(data.message || "Failed to load predictions");
         }
-      } catch {
+      } catch (err) {
+         console.error("Failed to fetch predictions:", err);
         setError("Could not reach the server. Please try again.");
       } finally {
         setLoading(false);
