@@ -13,6 +13,7 @@ import favoritesRoute from "./routes/favoritesRoute.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
+import floorVisualizationRoute from "./routes/floorVisualizationRoute.js";
 
 dotenv.config({ path: ".env" });
 
@@ -51,6 +52,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api", getbookingdata);
 // get/Use Parking API routes
 app.use("/api/parking", parkingApi);
+
+app.use("/api/parking/:parkingId/floors", floorVisualizationRoute);
 // Use Booking Routes
 app.use("/api/bookings", bookingRouter);
 // Use slot management route.
