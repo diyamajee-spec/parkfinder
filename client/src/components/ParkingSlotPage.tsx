@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import PredictionPanel from "./PredictionPanel";
 import FloorVisualization from "./FloorVisualization";
+import { useRouteNavigation } from "../hooks/useRouteNavigation";
+import { getUserLocation } from "../utils/geolocation";
 
 interface ParkingSlot {
   _id: string;
@@ -141,7 +143,6 @@ const ParkingSlotPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<ParkingSlot | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("");
@@ -154,6 +155,8 @@ const ParkingSlotPage: React.FC = () => {
     lng: number;
   } | null>(null);
   const [duration, setDuration] = useState(1);
+  const paymentAmount = selectedSlot ? selectedSlot.pricePerHour * duration : 0;
+  const [evFilter, setEvFilter] = useState<boolean>(false);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   // Navigation & routing hook usage
@@ -276,7 +279,7 @@ const ParkingSlotPage: React.FC = () => {
    */
   const fetchParkingSlots = useCallback(async (isEV: boolean = false) => {
     try {
-      const response = await fetch(`/api/parking`);
+      const response = await fetch(`/api/parking${isEV ? "?isEV=true" : ""}`);
       const result: ApiResponse = await response.json();
       if (result.success) {
         const slotsWithCoordinates = result.data.map((slot, index) => ({
@@ -421,7 +424,6 @@ const ParkingSlotPage: React.FC = () => {
       return;
     }
     setSelectedSlot(slot);
-    setPaymentAmount(slot.pricePerHour * 1);
     setDuration(1);
     document.getElementById("booking-modal")?.classList.remove("hidden");
     document.getElementById("booking-modal")?.classList.add("flex");
@@ -460,9 +462,6 @@ const ParkingSlotPage: React.FC = () => {
 
   const handleDurationChange = (hours: number) => {
     setDuration(hours);
-    if (selectedSlot) {
-      setPaymentAmount(selectedSlot.pricePerHour * hours);
-    }
   };
 
   const closeModal = () => {
