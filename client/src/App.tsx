@@ -12,6 +12,10 @@ import AdminPanel from "./components/AdminPanel";
 import DashboardPage from "./components/Dashboard";
 import BackToTop from "./components/BackToTop";
 
+// Humare naye pages jo humne create kiye hain
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
+
 function App() {
   return (
     <Router>
@@ -27,6 +31,10 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="/admin-panel" element={<AdminPanel />} />
+        
+        {/* Naye added routes */}
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
       </Routes>
     </Router>
   );
