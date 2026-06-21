@@ -14,8 +14,12 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import floorVisualizationRoute from "./routes/floorVisualizationRoute.js";
+import { connectRedis } from "./utils/cache.js";
 
 dotenv.config({ path: ".env" });
+
+// Connect to Redis
+connectRedis();
 
 // Validate critical environment variables at startup
 const requiredEnvVars = ["JWT_SECRET", "ADMIN_SECRET"];
