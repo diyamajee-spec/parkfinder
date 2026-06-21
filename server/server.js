@@ -15,6 +15,9 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import floorVisualizationRoute from "./routes/floorVisualizationRoute.js";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+import { swaggerOptions } from "./config/swagger.js";
 
 dotenv.config({ path: ".env" });
 
@@ -74,6 +77,10 @@ app.use("/api/dashboard", dashboardRoute);
 
 // use predictions — availability forecast based on historical occupancy
 app.use("/api/predictions", predictionRoute);
+
+// Setup Swagger Docs
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Root Route
 app.get("/", (req, res) => {
