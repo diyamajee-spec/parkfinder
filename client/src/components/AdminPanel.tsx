@@ -36,6 +36,7 @@ interface ParkingSlot {
   status: "available" | "occupied" | "maintenance" | string;
   capacity: number;
   availableSlots: number;
+  description?: string;
   distance?: string;
   rating?: number;
   images?: string[];
@@ -1389,6 +1390,25 @@ export default function AdminPanel() {
                     }
                     className={`w-full px-4 py-3 ${currentTheme.inputBg} border ${currentTheme.inputBorder} rounded-xl ${currentTheme.text} focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300`}
                     placeholder="Enter location"
+                  />
+                </div>
+                <div className="group md:col-span-2">
+                  <label
+                    className={`block text-sm font-medium ${currentTheme.text} mb-2`}
+                  >
+                    Description (Markdown supported)
+                  </label>
+                  <textarea
+                    value={slotForm.description || ""}
+                    onChange={(e) =>
+                      setSlotForm({
+                        ...slotForm,
+                        description: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    className={`w-full px-4 py-3 ${currentTheme.inputBg} border ${currentTheme.inputBorder} rounded-xl ${currentTheme.text} focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300 font-mono text-sm`}
+                    placeholder="Enter description using Markdown (e.g. **bold**, - list items)"
                   />
                 </div>
                 <div className="group">

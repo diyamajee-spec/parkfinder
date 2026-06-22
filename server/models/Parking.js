@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 const parkingSchema = new mongoose.Schema(
   {
     name: String,
+    description: { type: String, default: "" },
     location: String,
     pricePerHour: Number,
     status: String,
