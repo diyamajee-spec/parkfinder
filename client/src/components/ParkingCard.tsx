@@ -3,6 +3,8 @@ import * as Icons from "lucide-react";
 import type { ParkingSlot } from "../hooks/useParkingSlots";
 import { useThemeClasses } from "../hooks/useThemeClasses";
 import ImageCarousel from "./ImageCarousel";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
 import { calculateDistance, getDirectionsUrl } from "../utils/distance";
 import {
   getAvailabilityColor,
@@ -175,6 +177,17 @@ export const ParkingCard: React.FC<ParkingCardProps> = ({
             ></div>
           </div>
         </div>
+
+        {/* Description */}
+        {slot.description && (
+          <div className={`mb-6 p-4 ${themeClasses.cardBgSecondary} border ${themeClasses.border} rounded-xl`}>
+            <div className={`prose prose-sm dark:prose-invert max-w-none max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-[#1B42CB]/50 scrollbar-track-transparent pr-2`}>
+              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+                {slot.description}
+              </ReactMarkdown>
+            </div>
+          </div>
+        )}
 
         {/* Emergency Contact */}
         {slot.emergencyContact?.phone && (

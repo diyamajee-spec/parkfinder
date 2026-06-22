@@ -19,7 +19,24 @@ router.post("/", authMiddleware, adminMiddleware, validateRequest(createSlotSche
 // PUT update slot
 router.put("/:id", authMiddleware, adminMiddleware, validateRequest(updateSlotSchema), updateSlot);
 
-// DELETE slot
+/**
+ * @swagger
+ * /api/admin/slots/{id}:
+ *   delete:
+ *     summary: Delete a parking slot
+ *     tags: [Parking Lots]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Slot deleted successfully
+ */
 router.delete("/:id", authMiddleware, adminMiddleware,deleteSlot);
 
 export default router;

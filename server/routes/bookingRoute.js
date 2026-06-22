@@ -8,7 +8,18 @@ import { createBookingSchema, updateBookingStatusSchema, cancelBookingSchema } f
 const router = express.Router();
 
 // ================== USER BOOKINGS ==================
-// Get current user's bookings
+/**
+ * @swagger
+ * /api/bookings/my-bookings:
+ *   get:
+ *     summary: Get current user's bookings
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of bookings
+ */
 router.get("/my-bookings", authMiddleware, getMyBookings);
 
 // Create new booking (user)
@@ -18,7 +29,18 @@ router.post("/book", authMiddleware, validateRequest(createBookingSchema), creat
 router.delete("/cancel/:id", authMiddleware, validateRequest(cancelBookingSchema), cancelBooking);
 
 // ================== ADMIN BOOKINGS ==================
-// Get all bookings (admin only)
+/**
+ * @swagger
+ * /api/bookings/all:
+ *   get:
+ *     summary: Get all bookings (admin only)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all bookings
+ */
 router.get("/all", authMiddleware,getAllBookings);
 
 // Update booking status (admin only)

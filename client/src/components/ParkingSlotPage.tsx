@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Icons from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import PredictionPanel from "./PredictionPanel";
+import PeakHoursIndicator from "./PeakHoursIndicator";
 import FloorVisualization from "./FloorVisualization";
 
 // Hooks
@@ -365,7 +365,7 @@ const ParkingSlotPage: React.FC = () => {
 
       {/* Prediction Panel Modal */}
       {predictionSlot && (
-        <PredictionPanel
+        <PeakHoursIndicator
           parkingId={predictionSlot._id}
           parkingName={predictionSlot.name}
           onClose={() => setPredictionSlot(null)}

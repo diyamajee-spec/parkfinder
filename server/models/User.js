@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
     email: { type: String, unique: true },
     password: String,
     role: { type: String, default: "user" },
+    twoFactorSecret: { type: String, select: false },
+    isTwoFactorEnabled: { type: Boolean, default: false },
     resetToken: String,
     resetTokenExpiry: Date,
     favorites: [

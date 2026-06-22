@@ -62,6 +62,22 @@ export const login = async (req, res) => {
     if (!isMatch)
       return res.json({ success: false, message: "Incorrect password" });
 
+    // Check if user is admin or manager and has 2FA enabled
+    if ((user.role === "admin" || user.role === "manager") && user.isTwoFactorEnabled) {
+      // Return a temporary short-lived token instead of the full access token
+      const tempToken = jwt.sign(
+        { id: user._id, role: user.role, isTemp: true },
+        process.env.JWT_SECRET,
+        { expiresIn: "5m" } // valid for 5 minutes
+      );
+      
+      return res.json({
+        success: true,
+        requires2FA: true,
+        tempToken,
+      });
+    }
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -73,6 +89,70 @@ export const login = async (req, res) => {
     res.json({
       success: true,
       token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+import speakeasy from "speakeasy";
+
+export const verify2FALogin = async (req, res) => {
+  try {
+    const { tempToken, token } = req.body;
+
+    if (!tempToken || !token) {
+      return res.status(400).json({ success: false, message: "Missing tokens" });
+    }
+
+    // Verify temp token
+    let decoded;
+    try {
+      decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ success: false, message: "Temporary token expired or invalid" });
+    }
+
+    if (!decoded.isTemp) {
+      return res.status(400).json({ success: false, message: "Invalid temporary token" });
+    }
+
+    const user = await User.findById(decoded.id).select("+twoFactorSecret");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (!user.isTwoFactorEnabled || !user.twoFactorSecret) {
+      return res.status(400).json({ success: false, message: "2FA is not enabled for this user" });
+    }
+
+    // Verify TOTP token
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: "base32",
+      token,
+    });
+
+    if (!verified) {
+      return res.status(400).json({ success: false, message: "Invalid 2FA token" });
+    }
+
+    // Generate real access token
+    const finalToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      success: true,
+      token: finalToken,
       user: {
         _id: user._id,
         name: user.name,

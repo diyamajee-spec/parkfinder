@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
+    "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
@@ -27,8 +28,10 @@
     "react-hot-toast": "^2.6.0",
     "react-is": "^19.2.7",
     "react-leaflet": "^5.0.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.10.1",
     "recharts": "^3.6.0",
+    "rehype-sanitize": "^6.0.0",
     "tailwindcss": "^4.1.17",
     "uuid": "^13.0.0"
   },

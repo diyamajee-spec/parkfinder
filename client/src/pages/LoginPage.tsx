@@ -55,6 +55,12 @@ export default function LoginPage() {
   const [msg, setMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // 2FA states
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [tempToken, setTempToken] = useState("");
+  const [twoFactorToken, setTwoFactorToken] = useState("");
+  
   // const [theme, setTheme] = useState<"light" | "dark">("dark");
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -113,14 +119,50 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        login(data.user, data.token);
-        navigate("/");
+        if (data.requires2FA) {
+          setRequires2FA(true);
+          setTempToken(data.tempToken);
+        } else {
+          login(data.user, data.token);
+          navigate("/");
+        }
       } else {
         setMsg(data.message || "Login failed. Please check your credentials.");
       }
     } catch (err) {
       setMsg("Network error. Please try again.");
       console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handle2FASubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!twoFactorToken) return;
+
+    setIsLoading(true);
+    setMsg("");
+
+    try {
+      const res = await fetch(`/api/auth/login/verify-2fa`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tempToken, token: twoFactorToken }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        login(data.user, data.token);
+        navigate("/");
+      } else {
+        setMsg(data.message || "Invalid 2FA token.");
+      }
+    } catch (err) {
+      setMsg("Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -185,6 +227,7 @@ export default function LoginPage() {
           )}
 
           {/* Form */}
+          {!requires2FA ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -331,6 +374,45 @@ export default function LoginPage() {
               </p>
             </div>
           </form>
+          ) : (
+          <form onSubmit={handle2FASubmit} className="space-y-6">
+            <div>
+              <label className={`block text-sm font-medium ${themeClasses.text} mb-2`}>
+                Authenticator Code
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                  <Lock className={`w-5 h-5 ${themeClasses.iconColor}`} />
+                </div>
+                <input
+                  type="text"
+                  required
+                  className={`w-full pl-12 pr-4 py-3 ${themeClasses.inputBg} border ${themeClasses.inputBorder} rounded-xl ${themeClasses.text} focus:outline-none focus:border-[#1B42CB] focus:ring-2 focus:ring-[#1B42CB]/20 transition-all duration-300`}
+                  placeholder="Enter 6-digit code"
+                  value={twoFactorToken}
+                  onChange={(e) => {
+                    setTwoFactorToken(e.target.value);
+                    if (msg) setMsg("");
+                  }}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-4 bg-gradient-to-r ${themeClasses.buttonGradient} text-white font-bold rounded-xl hover:shadow-xl hover:shadow-[#FF2F6C]/20 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2`}
+            >
+              {isLoading ? "Verifying..." : "Verify Code"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRequires2FA(false); setTempToken(""); setTwoFactorToken(""); setMsg(""); }}
+              className={`w-full py-3 text-center block text-sm ${themeClasses.textMuted} hover:${themeClasses.text} transition-colors`}
+            >
+              Back to Login
+            </button>
+          </form>
+          )}
         </div>
       </div>
 

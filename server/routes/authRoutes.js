@@ -20,6 +20,33 @@ router.post("/signup", authLimiter, validateRequest(signupSchema), signup);
 // Login (User)
 router.post("/login", authLimiter, validateRequest(loginSchema), login);
 
+/**
+ * @swagger
+ * /api/auth/login/verify-2fa:
+ *   post:
+ *     summary: Verify 2FA token during login for admins/managers
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [tempToken, token]
+ *             properties:
+ *               tempToken:
+ *                 type: string
+ *               token:
+ *                 type: string
+ *                 description: 6-digit TOTP code
+ *     responses:
+ *       200:
+ *         description: 2FA verified successfully, returns full access token
+ *       401:
+ *         description: Invalid or expired token
+ */
+router.post("/login/verify-2fa", authLimiter, verify2FALogin);
+
 // Forgot password
 router.post("/forgot-password", resetLimiter, validateRequest(forgotPasswordSchema), forgotPassword);
 
