@@ -325,6 +325,61 @@ For more security details, see [SECURITY.md](SECURITY.md).
 
 ---
 
+## ⚡ Redis Caching Architecture
+
+Parkfinder utilizes **Redis** as a centralized, server-side caching layer to significantly reduce database load and improve response times for read-heavy operations, such as parking slot searches and dashboard queries.
+
+### 1. Redis Setup Instructions
+
+**Prerequisites:**
+You need a running Redis instance.
+- **Local:** Install Redis via Homebrew (`brew install redis`), Docker (`docker run -d -p 6379:6379 redis`), or download the Windows port.
+- **Cloud:** Use a managed Redis service like Upstash or Redis Enterprise.
+
+**Environment Variable:**
+Add your Redis connection string to the `.env` file in the `server/` directory:
+```env
+REDIS_URL=redis://localhost:6379
+```
+
+### 2. Cache Architecture & Key Generation Strategy
+
+- **Middleware Approach:** Caching is implemented as an Express middleware (`server/utils/cache.js`) that intercepts requests. If a cache hit occurs, it responds immediately; otherwise, it passes the request to the database and caches the outgoing response.
+- **Key Generation:** Cache keys are generated deterministically using the requested URL path and query parameters.
+  *Example Key:* `cache:/api/slots?location=Downtown&isEV=true`
+
+### 3. TTL (Time-To-Live) Configuration
+
+Different endpoints demand different caching strategies. The TTL is configurable per route by passing options to the middleware:
+```javascript
+// Caches response for 60 seconds
+router.get("/", cacheMiddleware({ ttl: 60 }), getParkingSlots);
+```
+- **Frequent Updates:** (e.g., slot searches) use a short TTL like `60` seconds.
+- **Static Data:** (e.g., general analytics) can use a longer TTL.
+
+### 4. Cache Invalidation Workflow
+
+To prevent serving stale data, the cache is automatically invalidated whenever a resource is mutated (created, updated, or deleted):
+1. An Admin creates, updates, or deletes a parking slot.
+2. The database updates the document.
+3. The controller calls `clearCache()` to purge all cached results globally (matching `cache:*`).
+4. The next user request fetches fresh data and repopulates the Redis cache.
+
+### 5. Fallback Behavior
+
+The system is designed with a **graceful fallback**. If the Redis service crashes or becomes temporarily unavailable, the middleware catches the error and silently falls back to direct database queries without affecting application availability or user experience.
+
+### 6. Guidelines for Enabling Caching on Future Endpoints
+
+To add caching to a new read-heavy endpoint:
+1. Import `cacheMiddleware` from `../utils/cache.js`.
+2. Insert it before your controller function in the route definition.
+3. Define an appropriate `ttl` in seconds: `cacheMiddleware({ ttl: 120 })`.
+4. Ensure any controller modifying this data calls `clearCache()` to invalidate it.
+
+---
+
 Here's an overview of how the repository is structured:
 
 ```text

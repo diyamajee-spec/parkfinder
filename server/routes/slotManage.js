@@ -1,35 +1,15 @@
-// server/routes/adminSlots.js
 import express from "express";
 import { authMiddleware, adminMiddleware } from "../middleware/auth.js";
 import { allSlots, deleteSlot, getParkingSlots, newSlot, updateSlot } from "../controllers/slotManage.controller.js";
+import { cacheMiddleware } from "../utils/cache.js";
 
 const router = express.Router();
 
-/**
- * @swagger
- * /api/admin/slots:
- *   get:
- *     summary: Get all parking slots (Public)
- *     tags: [Parking Lots]
- *     responses:
- *       200:
- *         description: List of parking slots
- */
-router.get("/", getParkingSlots);
+// GET /api/slots -> Used by the frontend for users to search/filter slots
+router.get("/", cacheMiddleware({ ttl: 60 }), getParkingSlots);
 
-/**
- * @swagger
- * /api/admin/slots/admin/all:
- *   get:
- *     summary: Get all parking slots for admin
- *     tags: [Parking Lots]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of all slots with details
- */
-router.get("/admin/all", authMiddleware, adminMiddleware, allSlots);
+// GET all slots
+router.get("/admin/all", authMiddleware, adminMiddleware, cacheMiddleware({ ttl: 60 }), allSlots);
 
 /**
  * @swagger

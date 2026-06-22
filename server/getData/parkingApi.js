@@ -1,9 +1,10 @@
 import express from "express";
 import Parking from "../models/Parking.js";
+import { cacheMiddleware } from "../utils/cache.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", cacheMiddleware({ ttl: 60 }), async (req, res) => {
   try {
     const data = await Parking.find();
     res.json({ success: true, data });
