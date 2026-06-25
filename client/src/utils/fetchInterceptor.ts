@@ -8,7 +8,7 @@ window.fetch = async function (
 ): Promise<Response> {
   const maxRetries = 3;
   let attempt = 0;
-  let delay = 1000;
+  const delay = 1000;
 
   while (attempt <= maxRetries) {
     let requestToFetch: RequestInfo | URL = input;

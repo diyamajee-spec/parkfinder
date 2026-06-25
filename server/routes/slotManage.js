@@ -8,13 +8,39 @@ import { createSlotSchema, updateSlotSchema } from "../validators/slot.validator
 
 const router = express.Router();
 
-// GET /api/slots -> Used by the frontend for users to search/filter slots
+/**
+ * @swagger
+ * /api/admin/slots:
+ *   get:
+ *     summary: Get all parking slots (Public)
+ *     tags: [Parking Lots]
+ *     responses:
+ *       200:
+ *         description: List of parking slots
+ */
 router.get("/", cacheMiddleware({ ttl: 60 }), getParkingSlots);
 
 // GET all slots
 router.get("/admin/all", authMiddleware, adminMiddleware, adminLimiter, cacheMiddleware({ ttl: 60 }), allSlots);
 
-// POST new slot
+/**
+ * @swagger
+ * /api/admin/slots:
+ *   post:
+ *     summary: Create a new parking slot
+ *     tags: [Parking Lots]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Parking'
+ *     responses:
+ *       201:
+ *         description: Slot created successfully
+ */
 router.post("/", authMiddleware, adminMiddleware, adminLimiter, validateRequest(createSlotSchema), newSlot);
 
 // PUT update slot

@@ -1,17 +1,24 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll } from "vitest";
 import express from "express";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 
-// Set up JWT_SECRET for test key generation
-process.env.JWT_SECRET = "test-secret-key-123456";
+// Set up environment flags for rate limit testing
+process.env.RATE_LIMIT_TESTING = "true";
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = "test-secret-key-123456";
+}
 
-// Import the limiters. Imported after setting process.env to ensure JWT_SECRET is available.
-import {
-  authLimiter,
-  bookingLimiter,
-  generalLimiter,
-} from "../middleware/rateLimiter.js";
+let authLimiter;
+let bookingLimiter;
+let generalLimiter;
+
+beforeAll(async () => {
+  const limiters = await import("../middleware/rateLimiter.js");
+  authLimiter = limiters.authLimiter;
+  bookingLimiter = limiters.bookingLimiter;
+  generalLimiter = limiters.generalLimiter;
+});
 
 describe("Rate Limiting Middleware Integration Tests", () => {
   let app;

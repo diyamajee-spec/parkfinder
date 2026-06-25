@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import app from '../server.js';
 import Parking from '../models/Parking.js';
@@ -10,7 +10,7 @@ describe('Booking Endpoints Integration Tests', () => {
   let parkingId;
   let bookingId;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // Register user and admin
     const userRes = await request(app).post('/api/auth/signup').send({
       name: 'Booking User', email: 'bookinguser@example.com', password: 'password123', role: 'user'
@@ -85,6 +85,12 @@ describe('Booking Endpoints Integration Tests', () => {
 
   describe('GET /api/bookings/my-bookings', () => {
     it('should fetch current user bookings', async () => {
+      const bookRes = await request(app)
+        .post('/api/bookings/book')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ parkingId, duration: 2 });
+      const createdBookingId = bookRes.body.data._id;
+
       const response = await request(app)
         .get('/api/bookings/my-bookings')
         .set('Authorization', `Bearer ${userToken}`);
@@ -93,12 +99,17 @@ describe('Booking Endpoints Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeInstanceOf(Array);
       expect(response.body.data.length).toBeGreaterThan(0);
-      expect(response.body.data[0]._id).toBe(bookingId);
+      expect(response.body.data[0]._id).toBe(createdBookingId);
     });
   });
 
   describe('GET /api/bookings/all', () => {
     it('should fetch all bookings as admin', async () => {
+      await request(app)
+        .post('/api/bookings/book')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ parkingId, duration: 2 });
+
       const response = await request(app)
         .get('/api/bookings/all')
         .set('Authorization', `Bearer ${adminToken}`);
@@ -120,21 +131,33 @@ describe('Booking Endpoints Integration Tests', () => {
 
   describe('PUT /api/bookings/:id/status', () => {
     it('should update booking status as admin', async () => {
+      const bookRes = await request(app)
+        .post('/api/bookings/book')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ parkingId, duration: 2 });
+      const createdBookingId = bookRes.body.data._id;
+
       const response = await request(app)
-        .put(`/api/bookings/${bookingId}/status`)
+        .put(`/api/bookings/${createdBookingId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ status: 'completed' });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       
-      const updatedBooking = await Booking.findById(bookingId);
+      const updatedBooking = await Booking.findById(createdBookingId);
       expect(updatedBooking.bookingStatus).toBe('completed');
     });
 
     it('should fail with invalid status value', async () => {
+      const bookRes = await request(app)
+        .post('/api/bookings/book')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ parkingId, duration: 2 });
+      const createdBookingId = bookRes.body.data._id;
+
       const response = await request(app)
-        .put(`/api/bookings/${bookingId}/status`)
+        .put(`/api/bookings/${createdBookingId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ status: 'invalid-status' });
 
@@ -165,6 +188,12 @@ describe('Booking Endpoints Integration Tests', () => {
     });
 
     it('should deny user cancelling someone else\'s booking', async () => {
+      const bookRes = await request(app)
+        .post('/api/bookings/book')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ parkingId, duration: 2 });
+      const createdBookingId = bookRes.body.data._id;
+
       // Create second user
       const user2Res = await request(app).post('/api/auth/signup').send({
         name: 'User 2', email: 'user2@example.com', password: 'password123'
@@ -173,7 +202,7 @@ describe('Booking Endpoints Integration Tests', () => {
 
       // User 2 tries to cancel User 1's booking
       const response = await request(app)
-        .delete(`/api/bookings/cancel/${bookingId}`)
+        .delete(`/api/bookings/cancel/${createdBookingId}`)
         .set('Authorization', `Bearer ${user2Token}`);
 
       expect(response.status).toBe(403);

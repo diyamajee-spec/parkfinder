@@ -84,6 +84,10 @@ if (process.env.REDIS_URL) {
 
 // Preset helper creator
 const createLimiterPreset = (windowMs, limit, message) => {
+  if (process.env.NODE_ENV === "test" && process.env.RATE_LIMIT_TESTING !== "true") {
+    return (req, res, next) => next();
+  }
+
   const limiter = rateLimit({
     windowMs,
     limit,

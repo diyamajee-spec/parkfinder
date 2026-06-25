@@ -9,7 +9,7 @@ export const authMiddleware = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Access denied. No token provided.",
+        message: "Access Denied. No token provided.",
       });
     }
 

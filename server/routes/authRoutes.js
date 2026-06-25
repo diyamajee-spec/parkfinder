@@ -13,10 +13,72 @@ import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } 
 
 const router = express.Router();
 
-// Signup
+/**
+ * @swagger
+ * /api/auth/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, password]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [user, manager, admin]
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: User already exists or validation error
+ */
 router.post("/signup", authLimiter, validateRequest(signupSchema), signup);
 
-// Login (User)
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Authenticate user and get token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 token: { type: string }
+ *                 requires2FA: { type: boolean }
+ *                 tempToken: { type: string }
+ *       400:
+ *         description: Invalid credentials
+ */
 router.post("/login", authLimiter, validateRequest(loginSchema), login);
 
 /**

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
 import app from "../server.js";
@@ -17,7 +17,7 @@ describe("Email 2FA Authentication Flow", () => {
   let userId;
   let deviceId = "test-device-uuid-1234";
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // Clear the user if exists
     await User.deleteOne({ email: userEmail });
 
@@ -35,7 +35,7 @@ describe("Email 2FA Authentication Flow", () => {
     userId = res.body.user._id;
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await User.deleteOne({ email: userEmail });
   });
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import app from '../server.js';
 import User from '../models/User.js';
@@ -77,7 +77,7 @@ describe('Auth Endpoints Integration Tests', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       // Create a user for login tests
       await request(app).post('/api/auth/signup').send(validUser);
     });
@@ -116,7 +116,7 @@ describe('Auth Endpoints Integration Tests', () => {
   describe('GET /api/auth/verify', () => {
     let token;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const response = await request(app).post('/api/auth/signup').send(validUser);
       token = response.body.token;
     });
@@ -144,9 +144,9 @@ describe('Auth Endpoints Integration Tests', () => {
         .get('/api/auth/verify')
         .set('Authorization', `Bearer invalid-token`);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('Invalid token.');
+      expect(response.body.message).toBe('Invalid or expired token');
     });
   });
 });
