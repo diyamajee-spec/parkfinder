@@ -27,7 +27,33 @@ const rawData = [
     images: [
       "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800",
       "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800",
-      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800"
+      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800",
+    ],
+    floors: [
+      {
+        floorNumber: 0,
+        floorName: "Ground Floor",
+        totalSlots: 40,
+        availableSlots: 15,
+        isCovered: true,
+        slotRows: generateSlotRows(40, 25, ["car", "car", "ev", "car", "bike"]),
+      },
+      {
+        floorNumber: 1,
+        floorName: "First Floor",
+        totalSlots: 40,
+        availableSlots: 18,
+        isCovered: true,
+        slotRows: generateSlotRows(40, 22, ["car", "car", "car", "disabled", "car"]),
+      },
+      {
+        floorNumber: 2,
+        floorName: "Second Floor",
+        totalSlots: 40,
+        availableSlots: 12,
+        isCovered: false,
+        slotRows: generateSlotRows(40, 28, ["car", "bike", "car", "car", "ev"]),
+      },
     ],
   },
   {
@@ -45,7 +71,25 @@ const rawData = [
     closingTime: "10:00 PM",
     images: [
       "https://images.unsplash.com/photo-1611288875785-5c4fe859e1a3?w=800",
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
+    ],
+    floors: [
+      {
+        floorNumber: 0,
+        floorName: "Ground Floor",
+        totalSlots: 100,
+        availableSlots: 0,
+        isCovered: false,
+        slotRows: generateSlotRows(100, 100, ["car"]),
+      },
+      {
+        floorNumber: 1,
+        floorName: "First Floor",
+        totalSlots: 100,
+        availableSlots: 0,
+        isCovered: false,
+        slotRows: generateSlotRows(100, 100, ["car"]),
+      },
     ],
   },
   {
@@ -64,7 +108,33 @@ const rawData = [
     images: [
       "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800",
       "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800",
-      "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800"
+      "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800",
+    ],
+    floors: [
+      {
+        floorNumber: -2,
+        floorName: "Basement B2",
+        totalSlots: 120,
+        availableSlots: 30,
+        isCovered: true,
+        slotRows: generateSlotRows(120, 90, ["car", "car", "ev", "car"]),
+      },
+      {
+        floorNumber: -1,
+        floorName: "Basement B1",
+        totalSlots: 120,
+        availableSlots: 50,
+        isCovered: true,
+        slotRows: generateSlotRows(120, 70, ["car", "disabled", "car", "car"]),
+      },
+      {
+        floorNumber: 0,
+        floorName: "Ground Level",
+        totalSlots: 110,
+        availableSlots: 40,
+        isCovered: true,
+        slotRows: generateSlotRows(110, 70, ["car", "bike", "car", "ev", "car"]),
+      },
     ],
   },
   {
@@ -81,8 +151,9 @@ const rawData = [
     openingTime: "07:00 AM",
     closingTime: "09:00 PM",
     images: [
-      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800"
+      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800",
     ],
+    floors: [],
   },
   {
     name: "Airport Multi-Level Parking",
@@ -100,214 +171,49 @@ const rawData = [
     images: [
       "https://images.unsplash.com/photo-1559329255-4b5b3e5f1e63?w=800",
       "https://images.unsplash.com/photo-1611288875785-5c4fe859e1a3?w=800",
-      "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800"
-    ],
-  },
-  {
-    name: "Power Favoriter",
-    email: "power.favorites@demo.com",
-    password: "Demo@1234",
-    role: "user",
-    favorites: [],
-  },
-  {
-    name: "Zero Faves",
-    email: "zero.faves@demo.com",
-    password: "Demo@1234",
-    role: "user",
-    favorites: [],
-  },
-  {
-    name: "New User Empty",
-    email: "newbie@demo.com",
-    password: "Demo@1234",
-    role: "user",
-    favorites: [],
-  },
-];
-
-// Define specific static parking lots
-const staticParkingLots = [
-  {
-    name: "Fully Occupied Lot",
-    location: "Connaught Place, Delhi",
-    pricePerHour: 45,
-    status: "occupied",
-    distance: "2km",
-    capacity: 100,
-    availableSlots: 0,
-    isCovered: true,
-    securityLevel: "medium",
-    rating: 4.2,
-    openingTime: "09:00 AM",
-    closingTime: "08:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800",
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
-    ],
-  },
-  {
-    name: "Under Repair Garage",
-    location: "Bandra, Mumbai",
-    pricePerHour: 0,
-    status: "maintenance",
-    distance: "4km",
-    capacity: 200,
-    availableSlots: 0,
-    isCovered: true,
-    securityLevel: "medium",
-    rating: 4.1,
-    openingTime: "24 Hours",
-    closingTime: "24 Hours",
-    images: [
-      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800",
-      "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800"
-    ],
-  },
-  {
-    name: "Super Ultra Premium Covered Multi-Level Automated Smart Parking Facility — Phase III Extension Wing North Block",
-    location: "Whitefield IT Corridor, Outer Ring Road, Bangalore, Karnataka 560066, India",
-    pricePerHour: 75,
-    status: "available",
-    distance: "8km",
-    capacity: 600,
-    availableSlots: 300,
-    isCovered: true,
-    securityLevel: "high",
-    rating: 4.4,
-    openingTime: "06:00 AM",
-    closingTime: "12:00 AM",
-    images: [
       "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800",
-      "https://images.unsplash.com/photo-1559329255-4b5b3e5f1e63?w=800",
-      "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800"
     ],
-  },
-  {
-    name: "Zero Slots But Open",
-    location: "Sarojini Nagar, Delhi",
-    pricePerHour: 20,
-    status: "available",
-    distance: "2km",
-    capacity: 50,
-    availableSlots: 0,
-    isCovered: false,
-    securityLevel: "low",
-    rating: 3.2,
-    openingTime: "08:00 AM",
-    closingTime: "09:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
-    ],
-  },
-  {
-    name: "Büro & Café Parking (Ñoida) — 'Premium' [Zone A]",
-    location: "Straße 12, München – Süd; Near <Mall>",
-    pricePerHour: 55,
-    status: "available",
-    distance: "3km",
-    capacity: 80,
-    availableSlots: 40,
-    isCovered: true,
-    securityLevel: "medium",
-    rating: 4.3,
-    openingTime: "10:00 AM",
-    closingTime: "11:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800",
-      "https://images.unsplash.com/photo-1611288875785-5c4fe859e1a3?w=800"
-    ],
-  },
-  {
-    name: "🚗 Smart Park 🅿️ — EV Charging ⚡ Zone",
-    location: "Koramangala 4th Block 🏙️, Bangalore",
-    pricePerHour: 60,
-    status: "available",
-    distance: "2km",
-    capacity: 120,
-    availableSlots: 60,
-    isCovered: true,
-    securityLevel: "high",
-    rating: 4.6,
-    openingTime: "07:00 AM",
-    closingTime: "10:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1559329255-4b5b3e5f1e63?w=800",
-      "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800"
-    ],
-  },
-  {
-    name: "Stadium Parking Zone",
-    location: "Chinnaswamy Stadium, Bangalore",
-    pricePerHour: 50,
-    status: "available",
-    distance: "1km",
-    capacity: 400,
-    availableSlots: 178,
-    isCovered: false,
-    securityLevel: "medium",
-    rating: 4.5,
-    openingTime: "06:00 AM",
-    closingTime: "11:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800",
-      "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800",
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
-    ],
-  },
-  {
-    name: "City Mall Roof Parking",
-    location: "Sector 62, No_ida",
-    pricePerHour: 35,
-    status: "available",
-    distance: "6km",
-    capacity: 70,
-    availableSlots: 35,
-    isCovered: false,
-    securityLevel: "low",
-    rating: 3.7,
-    openingTime: "09:00 AM",
-    closingTime: "11:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800",
-      "https://images.unsplash.com/photo-1559329255-4b5b3e5f1e63?w=800"
-    ],
-  },
-  {
-    name: "Full Contact Parking Hub",
-    location: "Nariman Point, Mumbai",
-    pricePerHour: 70,
-    status: "available",
-    distance: "1km",
-    capacity: 160,
-    availableSlots: 80,
-    isCovered: true,
-    securityLevel: "high",
-    rating: 4.7,
-    openingTime: "08:00 AM",
-    closingTime: "10:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1611288875785-5c4fe859e1a3?w=800",
-      "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800",
-      "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?w=800"
-    ],
-  },
-  {
-    name: "Local Market Parking",
-    location: "Lajpat Nagar, Delhi",
-    pricePerHour: 20,
-    status: "closed",
-    distance: "1km",
-    capacity: 110,
-    availableSlots: 0,
-    isCovered: false,
-    securityLevel: "low",
-    rating: 3.8,
-    openingTime: "09:00 AM",
-    closingTime: "09:00 PM",
-    images: [
-      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800",
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
+    floors: [
+      {
+        floorNumber: 0,
+        floorName: "Ground Floor",
+        totalSlots: 100,
+        availableSlots: 40,
+        isCovered: true,
+        slotRows: generateSlotRows(100, 60, ["car", "car", "ev", "car", "car"]),
+      },
+      {
+        floorNumber: 1,
+        floorName: "Level 1",
+        totalSlots: 100,
+        availableSlots: 50,
+        isCovered: true,
+        slotRows: generateSlotRows(100, 50, ["car", "car", "car", "bike", "car"]),
+      },
+      {
+        floorNumber: 2,
+        floorName: "Level 2",
+        totalSlots: 100,
+        availableSlots: 45,
+        isCovered: true,
+        slotRows: generateSlotRows(100, 55, ["car", "disabled", "car", "car", "ev"]),
+      },
+      {
+        floorNumber: 3,
+        floorName: "Level 3",
+        totalSlots: 100,
+        availableSlots: 40,
+        isCovered: false,
+        slotRows: generateSlotRows(100, 60, ["car", "car", "car", "car", "bike"]),
+      },
+      {
+        floorNumber: 4,
+        floorName: "Rooftop",
+        totalSlots: 100,
+        availableSlots: 35,
+        isCovered: false,
+        slotRows: generateSlotRows(100, 65, ["car", "car", "ev", "car", "car"]),
+      },
     ],
   },
 ];
@@ -317,6 +223,28 @@ const parkingData = rawData.map((slot) => ({
   ...slot,
   _id: new mongoose.Types.ObjectId(),
 }));
+
+// Helper to generate a slot row grid for a floor
+function generateSlotRows(totalSlots, occupiedSlots, vehicleTypes = []) {
+  const SLOTS_PER_ROW = 5;
+  const rows = [];
+  let slotIndex = 0;
+
+  for (let r = 0; r < Math.ceil(totalSlots / SLOTS_PER_ROW); r++) {
+    const rowLabel = String.fromCharCode(65 + r); // A, B, C...
+    const slots = [];
+    for (let s = 0; s < SLOTS_PER_ROW && slotIndex < totalSlots; s++, slotIndex++) {
+      slots.push({
+        slotId: `${rowLabel}${s + 1}`,
+        isOccupied: slotIndex < occupiedSlots,
+        isReserved: false,
+        vehicleType: vehicleTypes[slotIndex % vehicleTypes.length] || "car",
+      });
+    }
+    rows.push({ row: rowLabel, slots });
+  }
+  return rows;
+}
 
 async function seedDB() {
   try {

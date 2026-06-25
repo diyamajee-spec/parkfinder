@@ -33,14 +33,16 @@ const PredictionPanel: React.FC<PredictionPanelProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API = import.meta.env.VITE_API_URL;
   const { theme } = useTheme();
 
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API}/api/predictions/${parkingId}`);
+        const res = await fetch(`/api/predictions/${parkingId}`);
+        if (!res.ok) {
+        throw new Error(`Server error: ${res.status} ${res.statusText}`);
+      }
         const data = await res.json();
         if (data.success) {
           setPredictions(data.data);
@@ -48,7 +50,8 @@ const PredictionPanel: React.FC<PredictionPanelProps> = ({
         } else {
           setError(data.message || "Failed to load predictions");
         }
-      } catch {
+      } catch (err) {
+         console.error("Failed to fetch predictions:", err);
         setError("Could not reach the server. Please try again.");
       } finally {
         setLoading(false);
@@ -56,7 +59,7 @@ const PredictionPanel: React.FC<PredictionPanelProps> = ({
     };
 
     fetchPredictions();
-  }, [parkingId, API]);
+  }, [parkingId]);
 
   // ── Theme helpers ──────────────────────────────────────────────────────────
   const tc = {

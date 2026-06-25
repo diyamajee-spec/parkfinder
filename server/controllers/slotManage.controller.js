@@ -1,4 +1,5 @@
 import Parking from "../models/Parking.js";
+import { clearCache } from "../utils/cache.js";
 
 export const allSlots = async (req, res) => {
   try {
@@ -27,6 +28,7 @@ export const allSlots = async (req, res) => {
 export const newSlot = async (req, res) => {
   try {
     const slot = await Parking.create(req.body);
+    await clearCache(); // Invalidate all cached data
     res.json({ success: true, data: slot });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -37,6 +39,7 @@ export const updateSlot = async (req, res) => {
     const updated = await Parking.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+    await clearCache(); // Invalidate all cached data
     res.json({ success: true, data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -45,6 +48,7 @@ export const updateSlot = async (req, res) => {
 export const deleteSlot = async (req, res) => {
   try {
     await Parking.findByIdAndDelete(req.params.id);
+    await clearCache(); // Invalidate all cached data
     res.json({ success: true, message: "Deleted" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

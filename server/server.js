@@ -4,6 +4,7 @@ import connectDB from "./database/db.js";
 import bookingRouter from "./routes/bookingRoute.js";
 import getbookingdata from "./getData/booking.js";
 import authRoutes from "./routes/authRoutes.js";
+import auth2faRoutes from "./routes/auth2faRoutes.js";
 import adminSlotsRouter from "./routes/slotManage.js";
 import userManage from "./routes/userManage.js";
 import parkingLogRoute from "./routes/parkingLogRoute.js";
@@ -14,8 +15,16 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import { generalLimiter } from "./middleware/rateLimiter.js";
+import floorVisualizationRoute from "./routes/floorVisualizationRoute.js";
+import reviewRoute from "./routes/reviewRoute.js";
+import { connectRedis } from "./utils/cache.js";
 
 dotenv.config({ path: ".env" });
+
+// Connect to Redis
+if (process.env.NODE_ENV !== 'test') {
+  connectRedis();
+}
 
 // Validate critical environment variables at startup
 const requiredEnvVars = ["JWT_SECRET", "ADMIN_SECRET"];
@@ -47,13 +56,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(generalLimiter);
 
 // Connect to Database
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 // use auth route.
 app.use("/api/auth", authRoutes);
+app.use("/api/auth/2fa", auth2faRoutes);
 // get/Use Booking APi data
 app.use("/api", getbookingdata);
 // get/Use Parking API routes
 app.use("/api/parking", parkingApi);
+
+app.use("/api/parking/:parkingId/floors", floorVisualizationRoute);
 // Use Booking Routes
 app.use("/api/bookings", bookingRouter);
 // Use slot management route.
@@ -67,11 +81,18 @@ app.use("/api", parkingLogRoute);
 // use favorites route
 app.use("/api/favorites", favoritesRoute);
 
+// use reviews route
+app.use("/api/reviews", reviewRoute);
+
 // use dashboard.js
 app.use("/api/dashboard", dashboardRoute);
 
 // use predictions — availability forecast based on historical occupancy
 app.use("/api/predictions", predictionRoute);
+
+// Setup Swagger Docs
+// const swaggerDocs = swaggerJsDoc(swaggerOptions);
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Root Route
 app.get("/", (req, res) => {
@@ -88,6 +109,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

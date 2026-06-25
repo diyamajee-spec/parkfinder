@@ -137,3 +137,10 @@ export const generalLimiter = createLimiterPreset(
   100,
   "Too many requests. Please try again after a minute."
 );
+
+// 5. Password reset attempts - 3 requests / 15 minutes
+export const resetLimiter = createLimiterPreset(
+  15 * 60 * 1000,
+  3,
+  "Too many password reset attempts. Please try again after 15 minutes."
+);

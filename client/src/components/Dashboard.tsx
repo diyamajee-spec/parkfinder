@@ -11,6 +11,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 // @ts-ignore
 import { Pie, Bar, Line } from "react-chartjs-2";
 import * as Icons from "lucide-react";
+import { BarChart, Bar as RechartsBar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend as RechartsLegend } from "recharts";
 
 // Register ChartJS components
 ChartJS.register(
@@ -90,6 +91,45 @@ interface ActiveBooking {
     securityLevel: string;
   };
 }
+
+const THEME_CLASSES = {
+  light: {
+    bg: "bg-gray-50",
+    text: "text-gray-900",
+    textSecondary: "text-gray-600",
+    textMuted: "text-gray-500",
+    border: "border-gray-200",
+    cardBg: "bg-white",
+    cardBgSecondary: "bg-gray-50",
+    cardBorder: "border-gray-200",
+    overlay: "bg-black/5",
+    chartGrid: "rgba(0, 0, 0, 0.1)",
+    chartText: "#4B5563",
+    gradient: {
+      primary: "from-blue-600 to-blue-500",
+      secondary: "from-pink-600 to-pink-500",
+      accent: "from-blue-600 to-pink-600",
+    },
+  },
+  dark: {
+    bg: "bg-[#191919]",
+    text: "text-[#EEECF6]",
+    textSecondary: "text-[#EEECF6]/70",
+    textMuted: "text-[#EEECF6]/40",
+    border: "border-[#1B42CB]/20",
+    cardBg: "bg-[#191919]/60",
+    cardBgSecondary: "bg-[#191919]/80",
+    cardBorder: "border-[#1B42CB]/20",
+    overlay: "bg-black/40",
+    chartGrid: "rgba(238, 236, 246, 0.1)",
+    chartText: "#EEECF6",
+    gradient: {
+      primary: "from-[#1B42CB] to-[#1B42CB]/80",
+      secondary: "from-[#FF2F6C] to-[#FF2F6C]/80",
+      accent: "from-[#1B42CB] to-[#FF2F6C]",
+    },
+  },
+} as const;
 
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -289,47 +329,8 @@ const DashboardPage: React.FC = () => {
   };
 
   // Theme-based classes
-  const getThemeClasses = () => {
-    return theme === "light"
-      ? {
-          bg: "bg-gray-50",
-          text: "text-gray-900",
-          textSecondary: "text-gray-600",
-          textMuted: "text-gray-500",
-          border: "border-gray-200",
-          cardBg: "bg-white",
-          cardBgSecondary: "bg-gray-50",
-          cardBorder: "border-gray-200",
-          overlay: "bg-black/5",
-          chartGrid: "rgba(0, 0, 0, 0.1)",
-          chartText: "#4B5563",
-          gradient: {
-            primary: "from-blue-600 to-blue-500",
-            secondary: "from-pink-600 to-pink-500",
-            accent: "from-blue-600 to-pink-600",
-          },
-        }
-      : {
-          bg: "bg-[#191919]",
-          text: "text-[#EEECF6]",
-          textSecondary: "text-[#EEECF6]/70",
-          textMuted: "text-[#EEECF6]/40",
-          border: "border-[#1B42CB]/20",
-          cardBg: "bg-[#191919]/60",
-          cardBgSecondary: "bg-[#191919]/80",
-          cardBorder: "border-[#1B42CB]/20",
-          overlay: "bg-black/40",
-          chartGrid: "rgba(238, 236, 246, 0.1)",
-          chartText: "#EEECF6",
-          gradient: {
-            primary: "from-[#1B42CB] to-[#1B42CB]/80",
-            secondary: "from-[#FF2F6C] to-[#FF2F6C]/80",
-            accent: "from-[#1B42CB] to-[#FF2F6C]",
-          },
-        };
-  };
-
-  const themeClasses = getThemeClasses();
+  const themeClasses =
+    THEME_CLASSES[theme as keyof typeof THEME_CLASSES] || THEME_CLASSES.light;
 
   // Chart configurations with theme support
   const chartOptions = {
@@ -858,7 +859,29 @@ const DashboardPage: React.FC = () => {
               Booking & Spending Trends
             </h3>
             <div className="h-80">
-              <Bar data={barChartData} options={chartOptions} />
+              {stats?.bookingTrends && stats.bookingTrends.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.bookingTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "rgba(238, 236, 246, 0.1)" : "rgba(0, 0, 0, 0.1)"} />
+                    <XAxis dataKey="month" stroke={theme === 'dark' ? "#EEECF6" : "#4B5563"} />
+                    <YAxis stroke={theme === 'dark' ? "#EEECF6" : "#4B5563"} />
+                    <RechartsTooltip 
+                      contentStyle={{ 
+                        backgroundColor: theme === 'dark' ? '#191919' : '#ffffff',
+                        borderColor: theme === 'dark' ? 'rgba(27, 66, 203, 0.2)' : '#e5e7eb',
+                        color: theme === 'dark' ? '#EEECF6' : '#111827'
+                      }}
+                    />
+                    <RechartsLegend />
+                    <RechartsBar dataKey="spent" name="Spent (₹)" fill={theme === 'dark' ? "#1B42CB" : "#2563eb"} radius={[4, 4, 0, 0]} />
+                    <RechartsBar dataKey="bookings" name="Total Bookings" fill={theme === 'dark' ? "#FF2F6C" : "#db2777"} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className={`h-full flex items-center justify-center ${themeClasses.textMuted}`}>
+                  No spending data available yet.
+                </div>
+              )}
             </div>
           </div>
 

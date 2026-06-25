@@ -4,6 +4,37 @@ import MapComponent from "./MapComponent";
 import * as Icons from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
+const THEME_CLASSES = {
+  light: {
+    bg: "bg-gray-50",
+    text: "text-gray-900",
+    textSecondary: "text-gray-600",
+    border: "border-gray-200",
+    cardBg: "bg-white",
+    cardBorder: "border-gray-200",
+    overlay: "bg-black/5",
+    linear: {
+      primary: "from-blue-600 to-blue-500",
+      secondary: "from-pink-600 to-pink-500",
+      accent: "from-blue-600 to-pink-600",
+    },
+  },
+  dark: {
+    bg: "bg-[#191919]",
+    text: "text-[#EEECF6]",
+    textSecondary: "text-[#EEECF6]/70",
+    border: "border-[#1B42CB]/20",
+    cardBg: "bg-[#191919]/40",
+    cardBorder: "border-[#1B42CB]/20",
+    overlay: "bg-black/40",
+    linear: {
+      primary: "from-[#1B42CB] to-[#1B42CB]/80",
+      secondary: "from-[#FF2F6C] to-[#FF2F6C]/80",
+      accent: "from-[#1B42CB] to-[#FF2F6C]",
+    },
+  },
+} as const;
+
 const HomePage: React.FC = () => {
   const [isStarred, setIsStarred] = useState(false);
   const [favoriteMessage, setFavoriteMessage] = useState("");
@@ -11,6 +42,12 @@ const HomePage: React.FC = () => {
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ===== PAGINATION STATE =====
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const pageSize = 6;
 
   // Detect system theme
   const { theme } = useTheme();
@@ -25,21 +62,23 @@ const HomePage: React.FC = () => {
   }
 
   const mockCoordinates: Coordinates[] = [
-    { lat: 28.6159, lng: 77.2095 }, // Slot 1
-    { lat: 28.612, lng: 77.208 }, // Slot 2
-    { lat: 28.6145, lng: 77.2105 }, // Slot 3
-    { lat: 28.611, lng: 77.207 }, // Slot 4
-    { lat: 28.6165, lng: 77.211 }, // Slot 5
-    { lat: 28.6135, lng: 77.206 }, // Slot 6
-    { lat: 28.617, lng: 77.212 }, // Slot 7
-    { lat: 28.6105, lng: 77.205 }, // Slot 8
-    { lat: 28.618, lng: 77.213 }, // Slot 9
-    { lat: 28.6095, lng: 77.204 }, // Slot 10
+    { lat: 28.6159, lng: 77.2095 },
+    { lat: 28.612, lng: 77.208 },
+    { lat: 28.6145, lng: 77.2105 },
+    { lat: 28.611, lng: 77.207 },
+    { lat: 28.6165, lng: 77.211 },
+    { lat: 28.6135, lng: 77.206 },
+    { lat: 28.617, lng: 77.212 },
+    { lat: 28.6105, lng: 77.205 },
+    { lat: 28.618, lng: 77.213 },
+    { lat: 28.6095, lng: 77.204 },
   ];
 
-  const fetchParkingSlots = async () => {
+  // ===== FETCH PARKING SLOTS WITH PAGINATION =====
+  const fetchParkingSlots = async (page = 1) => {
     try {
-      const response = await fetch(`/api/parking`);
+      setLoading(true);
+      const response = await fetch(`/api/parking?page=${page}&limit=${pageSize}`);
       const result = await response.json();
 
       if (result.success) {
@@ -50,9 +89,13 @@ const HomePage: React.FC = () => {
               lat: 28.6139,
               lng: 77.209,
             },
-          }),
+          })
         );
         setParkingSlots(slotsWithCoordinates);
+        setCurrentPage(result.pagination.currentPage);
+        setTotalPages(result.pagination.totalPages);
+        setTotalItems(result.pagination.totalItems);
+        setError(null);
       } else {
         setError(result.message);
       }
@@ -65,7 +108,7 @@ const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchParkingSlots();
+    fetchParkingSlots(1);
   }, []);
 
   useEffect(() => {
@@ -118,40 +161,9 @@ const HomePage: React.FC = () => {
       color: "from-[#FF2F6C] to-[#1B42CB]",
     },
   ];
-  // Theme-based classes
-  const getThemeClasses = () => {
-    return theme === "light"
-      ? {
-          bg: "bg-gray-50",
-          text: "text-gray-900",
-          textSecondary: "text-gray-600",
-          border: "border-gray-200",
-          cardBg: "bg-white",
-          cardBorder: "border-gray-200",
-          overlay: "bg-black/5",
-          linear: {
-            primary: "from-blue-600 to-blue-500",
-            secondary: "from-pink-600 to-pink-500",
-            accent: "from-blue-600 to-pink-600",
-          },
-        }
-      : {
-          bg: "bg-[#191919]",
-          text: "text-[#EEECF6]",
-          textSecondary: "text-[#EEECF6]/70",
-          border: "border-[#1B42CB]/20",
-          cardBg: "bg-[#191919]/40",
-          cardBorder: "border-[#1B42CB]/20",
-          overlay: "bg-black/40",
-          linear: {
-            primary: "from-[#1B42CB] to-[#1B42CB]/80",
-            secondary: "from-[#FF2F6C] to-[#FF2F6C]/80",
-            accent: "from-[#1B42CB] to-[#FF2F6C]",
-          },
-        };
-  };
 
-  const themeClasses = getThemeClasses();
+  const themeClasses =
+    THEME_CLASSES[theme as keyof typeof THEME_CLASSES] || THEME_CLASSES.light;
 
   return (
     <div
@@ -166,7 +178,6 @@ const HomePage: React.FC = () => {
 
       {/* Navigation Dots */}
       <div className="fixed right-[2px] sm:right-3 lg:right-6 top-1/2 transform -translate-y-1/2 z-40 flex flex-col gap-1.5 sm:gap-2">
-        {" "}
         {[0, 1, 2].map((index) => (
           <button
             key={index}
@@ -193,7 +204,6 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
             {/* Left Content */}
             <div className="flex-1 text-center lg:text-left">
-              {/* Main Heading */}
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 <span className="block">
                   <span className="bg-linear-to-br from-gray-900 via-[#1B42CB] to-[#FF2F6C] bg-clip-text text-transparent dark:from-white">
@@ -212,7 +222,6 @@ const HomePage: React.FC = () => {
                 </span>
               </h1>
 
-              {/* Stats Counter */}
               <div className="flex flex-wrap items-center gap-6 mb-8">
                 <div className="flex items-center gap-3">
                   <div className={`text-3xl font-bold ${themeClasses.text}`}>
@@ -231,7 +240,6 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Description */}
               <p
                 className={`text-xl ${themeClasses.textSecondary} mb-10 max-w-2xl leading-relaxed`}
               >
@@ -245,7 +253,6 @@ const HomePage: React.FC = () => {
                 seamlessly.
               </p>
 
-              {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-5 mb-12">
                 <Link
                   to="/parkingslots"
@@ -260,11 +267,9 @@ const HomePage: React.FC = () => {
             {/* Right Side - Parking Card */}
             <div className="flex-1 w-full">
               <div className="relative max-w-md mx-auto lg:mx-0">
-                {/* Main Card */}
                 <div
                   className={`backdrop-blur-xl ${themeClasses.cardBg} ${themeClasses.cardBorder} border rounded-3xl p-8 shadow-2xl shadow-[#1B42CB]/20 overflow-hidden`}
                 >
-                  {/* Card Header */}
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-8">
                       <div>
@@ -300,9 +305,7 @@ const HomePage: React.FC = () => {
                           } else {
                             setFavoriteMessage("Removed from favorites");
                           }
-
                           setIsStarred(!isStarred);
-
                           setTimeout(() => {
                             setFavoriteMessage("");
                           }, 2000);
@@ -314,7 +317,6 @@ const HomePage: React.FC = () => {
                             {favoriteMessage}
                           </div>
                         )}
-
                         <Icons.Star
                           className={`w-5 h-5 ${
                             isStarred
@@ -325,7 +327,6 @@ const HomePage: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* Live Availability */}
                     <div
                       className={`bg-linear-to-br from-black/30 to-black/50 rounded-2xl p-6 mb-6 ${themeClasses.cardBorder} border`}
                     >
@@ -398,7 +399,6 @@ const HomePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Quick Info Grid */}
                     <div className="grid grid-cols-2 gap-4 mb-8">
                       <div
                         className={`bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors`}
@@ -485,7 +485,6 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Live Badge */}
                 <div className="absolute -top-3 right-8 px-4 py-1.5 bg-linear-to-br from-green-500 to-green-600 text-white font-bold rounded-full text-sm flex items-center gap-2 animate-pulse">
                   <span className="w-2 h-2 bg-white rounded-full"></span>
                   LIVE
@@ -550,17 +549,43 @@ const HomePage: React.FC = () => {
                   ))}
                 </div>
               </div>
-              {/* Live Map */}
               <div>
                 {error && (
                   <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     {error}
                   </div>
                 )}
-
                 <MapComponent parkingSlots={parkingSlots} loading={loading} />
               </div>
             </div>
+
+            {/* ===== PAGINATION CONTROLS ===== */}
+            {totalItems > pageSize && (
+              <div className="mt-8">
+                <div className="text-sm text-gray-500 dark:text-gray-400 text-center mb-2">
+                  Showing {parkingSlots.length} of {totalItems} parking spots
+                </div>
+                <div className="flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => fetchParkingSlots(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2 text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => fetchParkingSlots(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -764,7 +789,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Custom Animation */}
       <style>{`
         @keyframes float {
           0%,

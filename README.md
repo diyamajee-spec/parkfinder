@@ -325,6 +325,150 @@ For more security details, see [SECURITY.md](SECURITY.md).
 
 ---
 
+## ⚡ Redis Caching Architecture
+
+Parkfinder utilizes **Redis** as a centralized, server-side caching layer to significantly reduce database load and improve response times for read-heavy operations, such as parking slot searches and dashboard queries.
+
+### 1. Redis Setup Instructions
+
+**Prerequisites:**
+You need a running Redis instance.
+- **Local:** Install Redis via Homebrew (`brew install redis`), Docker (`docker run -d -p 6379:6379 redis`), or download the Windows port.
+- **Cloud:** Use a managed Redis service like Upstash or Redis Enterprise.
+
+**Environment Variable:**
+Add your Redis connection string to the `.env` file in the `server/` directory:
+```env
+REDIS_URL=redis://localhost:6379
+```
+
+### 2. Cache Architecture & Key Generation Strategy
+
+- **Middleware Approach:** Caching is implemented as an Express middleware (`server/utils/cache.js`) that intercepts requests. If a cache hit occurs, it responds immediately; otherwise, it passes the request to the database and caches the outgoing response.
+- **Key Generation:** Cache keys are generated deterministically using the requested URL path and query parameters.
+  *Example Key:* `cache:/api/slots?location=Downtown&isEV=true`
+
+### 3. TTL (Time-To-Live) Configuration
+
+Different endpoints demand different caching strategies. The TTL is configurable per route by passing options to the middleware:
+```javascript
+// Caches response for 60 seconds
+router.get("/", cacheMiddleware({ ttl: 60 }), getParkingSlots);
+```
+- **Frequent Updates:** (e.g., slot searches) use a short TTL like `60` seconds.
+- **Static Data:** (e.g., general analytics) can use a longer TTL.
+
+### 4. Cache Invalidation Workflow
+
+To prevent serving stale data, the cache is automatically invalidated whenever a resource is mutated (created, updated, or deleted):
+1. An Admin creates, updates, or deletes a parking slot.
+2. The database updates the document.
+3. The controller calls `clearCache()` to purge all cached results globally (matching `cache:*`).
+4. The next user request fetches fresh data and repopulates the Redis cache.
+
+### 5. Fallback Behavior
+
+The system is designed with a **graceful fallback**. If the Redis service crashes or becomes temporarily unavailable, the middleware catches the error and silently falls back to direct database queries without affecting application availability or user experience.
+
+### 6. Guidelines for Enabling Caching on Future Endpoints
+
+To add caching to a new read-heavy endpoint:
+1. Import `cacheMiddleware` from `../utils/cache.js`.
+2. Insert it before your controller function in the route definition.
+3. Define an appropriate `ttl` in seconds: `cacheMiddleware({ ttl: 120 })`.
+4. Ensure any controller modifying this data calls `clearCache()` to invalidate it.
+
+---
+
+## 🧪 Automated Integration Testing
+
+Parkfinder features a robust and modular automated integration testing suite built with **Vitest** and **Supertest** to validate critical backend API endpoints (such as Authentication and Bookings) ensuring reliability and preventing regressions.
+
+### 1. Framework Setup & Configuration
+- **Vitest:** The primary testing framework offering extremely fast, isolated test execution environments. Configured globally via `server/vitest.config.js`.
+- **Supertest:** Simulates HTTP requests against the Express application in memory without starting the physical server port.
+- **MongoDB Memory Server:** To maintain determinism and test isolation, a fresh, in-memory MongoDB instance is spun up via `server/test/setup.js`. This guarantees that tests do not mutate production or local development databases.
+
+### 2. Test Environment Requirements
+The tests run completely independently. Environment variables are statically overridden via Vitest (`NODE_ENV=test`, `JWT_SECRET`, `ADMIN_SECRET`), and Redis/Database connections are stubbed to prevent conflicts.
+To run the tests, simply execute the following command in the `server` directory:
+```bash
+npm run test
+```
+
+### 3. Guidelines for Writing New Integration Tests
+When creating tests for a new endpoint (e.g., `server/test/newFeature.integration.test.js`):
+1. **Import the Server Application:**
+   ```javascript
+   import request from 'supertest';
+   import app from '../server.js';
+   ```
+2. **Utilize `describe` and `it` blocks** to organize your tests by route and behavior.
+3. **Seed Data in `beforeAll`:** If your endpoints require an authenticated user or specific database items, create them once in the `beforeAll` hook.
+4. **Assert Appropriately:** Verify HTTP status codes (`expect(res.status).toBe(200)`), response payload structures, and success/error messages.
+
+### 4. Best Practices for Maintaining Deterministic API Tests
+- **Do not share state between tests:** Each `it` block should ideally run independently. Use `beforeEach` to reset specific state if necessary.
+- **Teardown Collections:** The `setup.js` file automatically cleans up collections using `afterEach` hooks (`await collections[key].deleteMany()`) so data does not bleed across tests.
+- **Isolate External Services:** Do not hit third-party APIs (e.g., payment gateways, emails). Use tools like `vi.mock()` or simply ensure the test environment bypasses real external executions.
+
+---
+
+## 🛡️ Zod Schema Validation Architecture
+
+To ensure data integrity and prevent malformed payloads from reaching the controllers, Parkfinder utilizes a centralized request validation layer powered by **Zod**.
+
+### 1. Framework Architecture
+- **Middleware:** A generic validation middleware (`server/middleware/validate.js`) intercepts requests before they hit the controller.
+- **Strict Verification:** The middleware parses the incoming `req.body`, `req.query`, and `req.params` against the provided Zod schema. If validation passes, the request is allowed through and properties are sanitized. If it fails, a structured HTTP 400 response is generated.
+- **Separation of Concerns:** Controllers are kept clean and focused strictly on business logic rather than checking for missing parameters or malformed data types.
+
+### 2. Schema Organization Strategy
+All validation schemas are modularly organized within the `server/validators/` directory based on the specific feature:
+- `auth.validator.js`: Schemas for user registration, login, and password resets.
+- `booking.validator.js`: Schemas for creating, updating, and cancelling reservations.
+- `slot.validator.js`: Schemas for admin slot modifications and creation.
+
+### 3. Error Response Format
+When validation fails, the API standardizes the response to an HTTP 400 Bad Request, structured as follows:
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "body.email",
+      "message": "Invalid email address"
+    },
+    {
+      "field": "body.password",
+      "message": "Password must be at least 6 characters"
+    }
+  ]
+}
+```
+
+### 4. Creating & Extending Validation on Future Endpoints
+To apply validation to a new route, follow these guidelines:
+1. **Define a Schema:** Create a new schema in the appropriate `server/validators/*.js` file.
+   ```javascript
+   export const updateProfileSchema = z.object({
+     body: z.object({
+       name: z.string().min(2, 'Name is required').optional(),
+     }),
+   });
+   ```
+2. **Apply the Middleware:** Import `validateRequest` and your schema in the route definition.
+   ```javascript
+   import { validateRequest } from '../middleware/validate.js';
+   import { updateProfileSchema } from '../validators/user.validator.js';
+
+   router.put('/profile', authMiddleware, validateRequest(updateProfileSchema), updateProfile);
+   ```
+3. **Use Passthrough For Agnostic Payloads:** When a schema should accept unpredictable additional properties, utilize `.passthrough()` on your Zod object.
+
+---
+
 Here's an overview of how the repository is structured:
 
 ```text

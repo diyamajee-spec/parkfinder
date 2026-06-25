@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import AnalyticsPanel from "./AnalyticsPanel";
+import AdminSecurityTab from "./AdminSecurityTab";
 import {
   Search,
   Edit,
@@ -35,6 +36,7 @@ interface ParkingSlot {
   status: "available" | "occupied" | "maintenance" | string;
   capacity: number;
   availableSlots: number;
+  description?: string;
   distance?: string;
   rating?: number;
   images?: string[];
@@ -67,7 +69,7 @@ interface Booking {
   bookingStatus: "active" | "cancelled" | "completed";
 }
 
-type TabType = "parking" | "users" | "bookings" | "analytics";
+type TabType = "parking" | "users" | "bookings" | "analytics" | "security";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<TabType>("parking");
@@ -714,6 +716,22 @@ export default function AdminPanel() {
                 className={`w-5 h-5 relative z-10 ${activeTab === "analytics" ? "animate-pulse" : ""}`}
               />
               <span className="relative z-10">Analytics</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("security")}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group ${
+                activeTab === "security"
+                  ? "text-white"
+                  : `${currentTheme.textSecondary} hover:${currentTheme.text}`
+              }`}
+            >
+              {activeTab === "security" && (
+                <div className="absolute inset-0 bg-gradient-to-r from-[#1B42CB] to-[#FF2F6C] animate-gradient"></div>
+              )}
+              <Shield
+                className={`w-5 h-5 relative z-10 ${activeTab === "security" ? "animate-pulse" : ""}`}
+              />
+              <span className="relative z-10">Security</span>
             </button>
           </div>
         </div>
@@ -1374,6 +1392,25 @@ export default function AdminPanel() {
                     placeholder="Enter location"
                   />
                 </div>
+                <div className="group md:col-span-2">
+                  <label
+                    className={`block text-sm font-medium ${currentTheme.text} mb-2`}
+                  >
+                    Description (Markdown supported)
+                  </label>
+                  <textarea
+                    value={slotForm.description || ""}
+                    onChange={(e) =>
+                      setSlotForm({
+                        ...slotForm,
+                        description: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    className={`w-full px-4 py-3 ${currentTheme.inputBg} border ${currentTheme.inputBorder} rounded-xl ${currentTheme.text} focus:outline-none focus:border-[#FF2F6C] focus:ring-2 focus:ring-[#FF2F6C]/20 transition-all duration-300 font-mono text-sm`}
+                    placeholder="Enter description using Markdown (e.g. **bold**, - list items)"
+                  />
+                </div>
                 <div className="group">
                   <label
                     className={`block text-sm font-medium ${currentTheme.text} mb-2`}
@@ -1571,6 +1608,9 @@ export default function AdminPanel() {
           </div>
         </div>
       )}
+
+      {/* Security Tab */}
+      {activeTab === "security" && <AdminSecurityTab />}
 
       {/* Custom Animations */}
       <style>{`
