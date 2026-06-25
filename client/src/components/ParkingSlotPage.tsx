@@ -216,7 +216,7 @@ const ParkingSlotPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>("");
   /** When true, only EV-charging-enabled slots are fetched from the API */
   const [evFilter, setEvFilter] = useState<boolean>(false);
-  const vehicleTypes = ["All", "Car", "Bike", "EV"];
+  const vehicleTypes = ["All", "Car", "Bike", "SUV", "EV"];
   const [vehicleFilter, setVehicleFilter] = useState<string>("All");
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [selectedMapSlot, setSelectedMapSlot] = useState<ParkingSlot | null>(
@@ -230,9 +230,6 @@ const ParkingSlotPage: React.FC = () => {
 
   // State for tracking favorited location IDs
   const [favorites, setFavorites] = useState<string[]>([]);
-
-  const [vehicleFilter, setVehicleFilter] = useState<string>("All");
-  const vehicleTypes = ["All", "Car", "Bike", "SUV", "EV"];
 
   // Navigation & routing hook usage
   const {

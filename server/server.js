@@ -13,6 +13,7 @@ import favoritesRoute from "./routes/favoritesRoute.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
+import { generalLimiter } from "./middleware/rateLimiter.js";
 
 dotenv.config({ path: ".env" });
 
@@ -29,6 +30,7 @@ if (missingEnvVars.length > 0) {
 }
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 app.use(
   cors({
@@ -36,12 +38,13 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    exposedHeaders: ["Authorization"],
+    exposedHeaders: ["Authorization", "Retry-After", "X-RateLimit-Limit", "X-RateLimit-Remaining"],
   }),
 );
 // Middleware to parse JSON body (if needed later)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(generalLimiter);
 
 // Connect to Database
 connectDB();

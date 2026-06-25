@@ -6,18 +6,19 @@ import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/auth.js";
 import { sendPasswordResetEmail } from "../utils/email.js";
 import { signup,login,verify } from "../controllers/auth.controller.js";
+import { authLimiter } from "../middleware/rateLimiter.js";
 
 
 const router = express.Router();
 
 // Signup
-router.post("/signup",signup);
+router.post("/signup", authLimiter, signup);
 
 // Login (User)
-router.post("/login",login);
+router.post("/login", authLimiter, login);
 
 // Forgot password
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -58,7 +59,7 @@ router.post("/forgot-password", async (req, res) => {
 });
 
 // Reset password
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", authLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
 

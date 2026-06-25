@@ -10,10 +10,12 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AdminPanel from "./components/AdminPanel";
 import DashboardPage from "./components/Dashboard";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" />
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />

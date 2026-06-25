@@ -7,12 +7,14 @@ import {
   getOccupancyAnalytics,
   getUsersAnalytics,
 } from "../controllers/analyticsController.js";
+import { adminLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
 // Middleware to ensure admin role check is applied to all analytics routes
 router.use(authMiddleware);
 router.use(adminMiddleware);
+router.use(adminLimiter);
 
 router.get("/bookings", getBookingsAnalytics);
 router.get("/revenue", getRevenueAnalytics);

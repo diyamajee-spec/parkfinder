@@ -18,11 +18,14 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^8.5.2",
     "fs": "^0.0.1-security",
+    "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
-    "nodemailer": "^8.0.9"
+    "nodemailer": "^8.0.9",
+    "rate-limit-redis": "^5.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
